@@ -406,6 +406,136 @@ a:focus-visible {
   }
 }
 
+.buyer-dashboard {
+  min-height: calc(100vh - 153px);
+  padding-bottom: 96px;
+  padding-top: 80px;
+}
+
+.buyer-dashboard__heading {
+  align-items: end;
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+}
+
+.buyer-dashboard__heading > div {
+  max-width: 720px;
+}
+
+.buyer-dashboard__heading > div > p:last-child,
+.recommendation-card__copy {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.buyer-dashboard__heading > div > p:last-child {
+  font-size: 18px;
+}
+
+.recommendation-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 40px;
+}
+
+.recommendation-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 330px;
+  padding: 24px;
+}
+
+.recommendation-card__header,
+.recommendation-card dl div,
+.recommendation-card__footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.recommendation-card__header p,
+.recommendation-card dt {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.recommendation-card__header strong {
+  color: var(--color-accent-strong);
+  font-size: 13px;
+}
+
+.recommendation-card h2 {
+  font-size: 26px;
+  line-height: 1.1;
+  margin: 28px 0 14px;
+}
+
+.recommendation-card dl {
+  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+  margin: auto 0 18px;
+  padding: 16px 0;
+}
+
+.recommendation-card dd {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.recommendation-card__footer {
+  align-items: end;
+  gap: 16px;
+}
+
+.recommendation-card ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recommendation-card li {
+  background: color-mix(in srgb, var(--color-positive) 18%, var(--color-surface));
+  color: var(--color-accent-strong);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px;
+}
+
+@media (max-width: 800px) {
+  .buyer-dashboard__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .buyer-dashboard__heading .link-button {
+    width: 100%;
+  }
+
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .buyer-dashboard {
+    padding-bottom: 72px;
+    padding-top: 56px;
+  }
+
+  .recommendation-card__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

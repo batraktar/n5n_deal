@@ -1,4 +1,5 @@
 import type { BuyerProfileFormValues } from "./buyer-profile-validation";
+import type { AssetPreview } from "@/features/assets/asset-types";
 
 export type BuyerProfile = Readonly<{
   budgetMax: string | null;
@@ -14,6 +15,12 @@ export type BuyerProfileFormState = Readonly<{
   fieldErrors: Readonly<Partial<Record<keyof BuyerProfileFormValues, string | undefined>>>;
   kind: "idle" | "validation_error" | "error";
   message: string | null;
+}>;
+
+export type BuyerRecommendation = Readonly<{
+  asset: AssetPreview;
+  reasons: readonly string[];
+  score: number;
 }>;
 
 export const initialBuyerProfileFormState: BuyerProfileFormState = {

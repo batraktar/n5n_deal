@@ -1,10 +1,24 @@
-import { UserRole, UserStatus } from "@/generated/prisma/client";
+import { AssetStatus, Prisma, UserRole, UserStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
+import { calculateAssetMatch } from "@/features/matching/matching-service";
+
 import type { BuyerProfileFormValues } from "./buyer-profile-validation";
-import type { BuyerProfile } from "./buyer-types";
+import type { BuyerProfile, BuyerRecommendation } from "./buyer-types";
 
 const demoBuyerEmail = "buyer@n5deal.demo";
+
+const recommendationAssetSelection = {
+  id: true,
+  title: true,
+  description: true,
+  industry: true,
+  valuation: true,
+  currency: true,
+  location: true,
+  revenue: true,
+  seller: { select: { email: true, name: true } },
+} satisfies Prisma.AssetSelect;
 
 export class DemoBuyerUnavailableError extends Error {
   override readonly name = "DemoBuyerUnavailableError";
@@ -77,4 +91,56 @@ export async function saveBuyerProfile(input: BuyerProfileFormValues): Promise<v
     },
     where: { userId: buyer.id },
   });
+}
+
+export async function getBuyerRecommendations(): Promise<readonly BuyerRecommendation[]> {
+  const profile = await getBuyerProfile();
+  if (profile === null) {
+    return [];
+  }
+
+  const assets = await prisma.asset.findMany({
+    orderBy: { createdAt: "desc" },
+    select: recommendationAssetSelection,
+    where: { status: AssetStatus.PUBLISHED },
+  });
+
+  return assets
+    .map((asset) => {
+      const match = calculateAssetMatch(
+        {
+          budgetMax: profile.budgetMax === null ? null : Number(profile.budgetMax),
+          budgetMin: profile.budgetMin === null ? null : Number(profile.budgetMin),
+          industries: profile.industries,
+          interests: profile.interests,
+          preferredLocations: profile.preferredLocations,
+        },
+        {
+          description: asset.description,
+          industry: asset.industry,
+          location: asset.location,
+          title: asset.title,
+          valuation: Number(asset.valuation),
+        },
+      );
+
+      return {
+        asset: {
+          id: asset.id,
+          title: asset.title,
+          description: asset.description,
+          industry: asset.industry,
+          valuation: asset.valuation.toString(),
+          currency: asset.currency,
+          location: asset.location,
+          revenue: asset.revenue?.toString() ?? null,
+          sellerName: asset.seller.name,
+          sellerEmail: asset.seller.email,
+        },
+        reasons: match.reasons,
+        score: match.score,
+      };
+    })
+    .filter((recommendation) => recommendation.score > 0)
+    .sort((left, right) => right.score - left.score);
 }
