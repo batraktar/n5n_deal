@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,6 +9,7 @@ import {
   sellerBuyerBudgetOptions,
 } from "@/features/seller/buyer-search";
 import { getSellerBuyerFilterOptions, getSellerBuyers } from "@/features/seller/buyer-repository";
+import { resolveLocale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,10 @@ function budgetLabel(
 export default async function SellerBuyersPage({ searchParams }: SellerBuyersPageProps) {
   const t = await getTranslations("seller");
   const filterT = await getTranslations("filters");
+  const locale = resolveLocale(await getLocale());
   const parameters = await searchParams;
   const search = parseSellerBuyerSearchParameters(parameters);
-  const [buyers, filters] = await Promise.all([getSellerBuyers(search), getSellerBuyerFilterOptions()]);
+  const [buyers, filters] = await Promise.all([getSellerBuyers(search, locale), getSellerBuyerFilterOptions(locale)]);
 
   return (
     <>

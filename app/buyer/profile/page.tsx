@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { BuyerProfileForm } from "@/components/buyer/buyer-profile-form";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getBuyerProfile } from "@/features/buyer/buyer-repository";
+import { resolveLocale } from "@/i18n/config";
 
 type BuyerProfilePageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -16,7 +17,8 @@ function isSavedNotice(value: string | readonly string[] | undefined): boolean {
 
 export default async function BuyerProfilePage({ searchParams }: BuyerProfilePageProps) {
   const t = await getTranslations("buyer");
-  const [profile, parameters] = await Promise.all([getBuyerProfile(), searchParams]);
+  const locale = resolveLocale(await getLocale());
+  const [profile, parameters] = await Promise.all([getBuyerProfile(locale), searchParams]);
 
   return (
     <>

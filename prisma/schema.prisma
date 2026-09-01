@@ -51,6 +51,20 @@ model BuyerProfile {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  translations       BuyerProfileTranslation[]
+}
+
+model BuyerProfileTranslation {
+  id              String       @id @default(cuid())
+  buyerProfileId  String
+  locale          String
+  interests       String
+  industries      String[]
+  preferredLocations String[]
+  buyerProfile    BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerProfileId, locale])
+  @@index([locale])
 }
 
 model Asset {
@@ -68,11 +82,26 @@ model Asset {
   updatedAt   DateTime    @updatedAt
   seller      User        @relation(fields: [sellerId], references: [id], onDelete: Restrict)
   messages    Message[]
+  translations AssetTranslation[]
 
   @@unique([sellerId, title])
   @@index([status, createdAt])
   @@index([industry, status])
   @@index([location, status])
+}
+
+model AssetTranslation {
+  id          String   @id @default(cuid())
+  assetId     String
+  locale      String
+  title       String
+  description String
+  industry    String
+  location    String
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, locale])
+  @@index([locale])
 }
 
 model Message {

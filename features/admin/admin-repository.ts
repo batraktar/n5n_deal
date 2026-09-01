@@ -2,6 +2,8 @@ import { AssetStatus, Prisma, UserRole, UserStatus } from "@/generated/prisma/cl
 import { prisma } from "@/lib/db/prisma";
 
 import { requireActiveRole } from "@/features/auth/authorization";
+import { getAssetTranslationMap } from "@/features/i18n/content-repository";
+import { defaultLocale, type Locale } from "@/i18n/config";
 
 import type { AdminAssetSearch, AdminUserSearch } from "./admin-validation";
 import type { AdminAsset, AdminUser } from "./admin-types";
@@ -74,7 +76,7 @@ function buildUserWhere(search: AdminUserSearch): Prisma.UserWhereInput {
   return where;
 }
 
-function buildAssetWhere(search: AdminAssetSearch): Prisma.AssetWhereInput {
+function buildAssetWhere(search: AdminAssetSearch, locale: Locale): Prisma.AssetWhereInput {
   const where: Prisma.AssetWhereInput = {};
 
   if (search.status !== "ALL") {
@@ -84,8 +86,22 @@ function buildAssetWhere(search: AdminAssetSearch): Prisma.AssetWhereInput {
   if (search.query !== undefined && search.query.length > 0) {
     where.OR = [
       { title: { contains: search.query, mode: "insensitive" } },
+      { description: { contains: search.query, mode: "insensitive" } },
       { industry: { contains: search.query, mode: "insensitive" } },
       { location: { contains: search.query, mode: "insensitive" } },
+      {
+        translations: {
+          some: {
+            locale: { in: locale === defaultLocale ? [defaultLocale] : [locale, defaultLocale] },
+            OR: [
+              { title: { contains: search.query, mode: "insensitive" } },
+              { description: { contains: search.query, mode: "insensitive" } },
+              { industry: { contains: search.query, mode: "insensitive" } },
+              { location: { contains: search.query, mode: "insensitive" } },
+            ],
+          },
+        },
+      },
     ];
   }
 
@@ -101,7 +117,10 @@ export async function getAdminUsers(search: AdminUserSearch): Promise<readonly A
   });
 }
 
-export async function getAdminAssets(search: AdminAssetSearch): Promise<readonly AdminAsset[]> {
+export async function getAdminAssets(
+  search: AdminAssetSearch,
+  locale: Locale = defaultLocale,
+): Promise<readonly AdminAsset[]> {
   await getDemoAdmin();
   const assets = await prisma.asset.findMany({
     orderBy: { createdAt: "desc" },
@@ -114,17 +133,18 @@ export async function getAdminAssets(search: AdminAssetSearch): Promise<readonly
       status: true,
       title: true,
     },
-    where: buildAssetWhere(search),
+    where: buildAssetWhere(search, locale),
   });
+  const translations = await getAssetTranslationMap(assets.map((asset) => asset.id), locale);
 
   return assets.map((asset) => ({
     createdAt: asset.createdAt,
     id: asset.id,
-    industry: asset.industry,
-    location: asset.location,
+    industry: translations.get(asset.id)?.industry ?? asset.industry,
+    location: translations.get(asset.id)?.location ?? asset.location,
     sellerName: asset.seller.name,
     status: asset.status,
-    title: asset.title,
+    title: translations.get(asset.id)?.title ?? asset.title,
   }));
 }
 

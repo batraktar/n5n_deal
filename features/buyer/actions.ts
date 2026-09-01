@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { resolveLocale } from "@/i18n/config";
 import { parseBuyerProfileFormData } from "./buyer-profile-validation";
 import { saveBuyerProfile } from "./buyer-repository";
 
@@ -40,7 +41,7 @@ export async function saveBuyerProfileAction(
   }
 
   try {
-    await saveBuyerProfile(parsed.data);
+    await saveBuyerProfile(parsed.data, resolveLocale(await getLocale()));
   } catch (error: unknown) {
     if (error instanceof Error) {
       return { fieldErrors: {}, kind: "error", message: errorsT("savePreferences") };

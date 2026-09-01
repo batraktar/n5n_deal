@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { SellerAssetCard } from "@/components/seller/seller-asset-card";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getSellerAssets } from "@/features/seller/seller-repository";
+import { resolveLocale } from "@/i18n/config";
 
 type SellerDashboardPageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -28,7 +29,8 @@ function getNotice(
 
 export default async function SellerDashboardPage({ searchParams }: SellerDashboardPageProps) {
   const t = await getTranslations("seller");
-  const [assets, parameters] = await Promise.all([getSellerAssets(), searchParams]);
+  const locale = resolveLocale(await getLocale());
+  const [assets, parameters] = await Promise.all([getSellerAssets(locale), searchParams]);
   const notice = getNotice(parameters["notice"], t);
 
   return (

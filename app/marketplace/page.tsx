@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { AssetCard } from "@/components/assets/asset-card";
 import { AssetFilterForm } from "@/components/assets/asset-filter-form";
@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getAssetFilterOptions, getPublishedAssetListing } from "@/features/assets/asset-repository";
 import { createMarketplaceHref, parseAssetSearchParameters } from "@/features/assets/asset-search";
+import { resolveLocale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +17,11 @@ type MarketplacePageProps = Readonly<{
 
 export default async function MarketplacePage({ searchParams }: MarketplacePageProps) {
   const t = await getTranslations("marketplace");
+  const locale = resolveLocale(await getLocale());
   const search = parseAssetSearchParameters(await searchParams);
   const [listing, filters] = await Promise.all([
-    getPublishedAssetListing(search),
-    getAssetFilterOptions(),
+    getPublishedAssetListing(search, locale),
+    getAssetFilterOptions(locale),
   ]);
 
   return (

@@ -6,6 +6,7 @@ import { ContactSellerForm } from "@/components/buyer/contact-seller-form";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getPublishedAssetById } from "@/features/assets/asset-repository";
+import { resolveLocale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +24,9 @@ function formatCurrency(value: string, currency: string, locale: string): string
 
 export default async function AssetDetailsPage({ params }: AssetDetailsPageProps) {
   const t = await getTranslations("asset");
-  const locale = await getLocale();
+  const locale = resolveLocale(await getLocale());
   const { assetId } = await params;
-  const asset = await getPublishedAssetById(assetId);
+  const asset = await getPublishedAssetById(assetId, locale);
 
   if (asset === null) {
     notFound();

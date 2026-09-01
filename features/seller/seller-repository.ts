@@ -3,6 +3,9 @@ import type { AssetStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 import { requireActiveRole } from "@/features/auth/authorization";
+import { getAssetTranslationMap } from "@/features/i18n/content-repository";
+import { mergeAssetTranslation } from "@/features/i18n/content-utils";
+import { defaultLocale, type Locale } from "@/i18n/config";
 
 import type { AssetFormValues } from "./asset-validation";
 import type { SellerAsset } from "./seller-types";
@@ -41,15 +44,33 @@ export class DemoSellerUnavailableError extends Error {
   }
 }
 
-function toSellerAsset(asset: Prisma.AssetGetPayload<{ select: typeof sellerAssetSelection }>): SellerAsset {
+function toSellerAsset(
+  asset: Prisma.AssetGetPayload<{ select: typeof sellerAssetSelection }>,
+  translation: Readonly<{
+    description: string;
+    industry: string;
+    location: string;
+    title: string;
+  }> | undefined,
+): SellerAsset {
+  const content = mergeAssetTranslation(
+    {
+      description: asset.description,
+      industry: asset.industry,
+      location: asset.location,
+      title: asset.title,
+    },
+    translation ?? null,
+  );
+
   return {
     id: asset.id,
-    title: asset.title,
-    description: asset.description,
-    industry: asset.industry,
+    title: content.title,
+    description: content.description,
+    industry: content.industry,
     valuation: asset.valuation.toString(),
     currency: asset.currency,
-    location: asset.location,
+    location: content.location,
     revenue: asset.revenue?.toString() ?? null,
     status: asset.status,
     updatedAt: asset.updatedAt,
@@ -85,15 +106,16 @@ export async function getDemoSeller(): Promise<Readonly<{ id: string }>> {
   return { id: seller.id };
 }
 
-export async function getSellerAssets(): Promise<readonly SellerAsset[]> {
+export async function getSellerAssets(locale: Locale = defaultLocale): Promise<readonly SellerAsset[]> {
   const seller = await getDemoSeller();
   const assets = await prisma.asset.findMany({
     orderBy: { updatedAt: "desc" },
     select: sellerAssetSelection,
     where: { sellerId: seller.id },
   });
+  const translations = await getAssetTranslationMap(assets.map((asset) => asset.id), locale);
 
-  return assets.map(toSellerAsset);
+  return assets.map((asset) => toSellerAsset(asset, translations.get(asset.id)));
 }
 
 export async function getSellerAssetById(assetId: string): Promise<SellerAsset | null> {
@@ -103,7 +125,7 @@ export async function getSellerAssetById(assetId: string): Promise<SellerAsset |
     where: { id: assetId, sellerId: seller.id },
   });
 
-  return asset === null ? null : toSellerAsset(asset);
+  return asset === null ? null : toSellerAsset(asset, undefined);
 }
 
 export async function createSellerAsset(input: AssetFormValues): Promise<Readonly<{ id: string }>> {

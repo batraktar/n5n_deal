@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { RecommendationCard } from "@/components/buyer/recommendation-card";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getBuyerProfile, getBuyerRecommendations } from "@/features/buyer/buyer-repository";
+import { resolveLocale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function BuyerDashboardPage() {
   const t = await getTranslations("buyer");
-  const [profile, recommendations] = await Promise.all([getBuyerProfile(), getBuyerRecommendations()]);
+  const locale = resolveLocale(await getLocale());
+  const [profile, recommendations] = await Promise.all([getBuyerProfile(locale), getBuyerRecommendations(locale)]);
 
   return (
     <>

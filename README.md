@@ -105,6 +105,7 @@ Important feature modules:
 - `features/matching/` contains the deterministic scoring algorithm.
 - `features/messages/` contains buyer message validation, persistence, and actions.
 - `features/admin/` contains moderation queries, filters, and actions.
+- `features/i18n/` contains UI locale configuration and localized marketplace content access with English fallback.
 - `features/auth/authorization.ts` contains the shared active-role policy.
 
 ## Technology stack
@@ -116,6 +117,7 @@ Important feature modules:
 - TypeScript with strict compiler settings;
 - Tailwind CSS 4 and project CSS tokens;
 - React Hook Form for interactive seller and buyer forms.
+- `next-intl` with English, Ukrainian, Polish, German, French, and Spanish UI catalogs.
 
 ### Backend
 
@@ -199,7 +201,9 @@ Main entities:
 
 - `User` — participant identity, role (`BUYER`, `SELLER`, `ADMIN`), and active/suspended status.
 - `BuyerProfile` — one-to-one buyer preferences, industries, locations, budgets, and currency.
+- `BuyerProfileTranslation` — locale-specific buyer interests, industries, and preferred locations.
 - `Asset` — seller-owned opportunity with title, description, industry, valuation, location, revenue, and listing status.
+- `AssetTranslation` — locale-specific asset title, description, industry, and location while preserving the core asset record and proper nouns.
 - `Message` — buyer/seller communication optionally linked to an asset.
 
 Relationships are enforced by Prisma foreign keys: a user owns assets, a buyer can have one profile, and messages reference sender, receiver, and optionally an asset. Asset deletion is restricted while related seller ownership exists; messages become asset-unlinked if an asset is removed by the database.
@@ -215,7 +219,7 @@ pnpm typecheck
 pnpm build
 ```
 
-The test suite currently covers 21 tests across 8 files, including:
+The test suite currently covers 32 tests across 12 files, including:
 
 - asset and buyer-profile validation;
 - marketplace search parameter parsing;
@@ -224,6 +228,7 @@ The test suite currently covers 21 tests across 8 files, including:
 - admin-only and suspended-user authorization behavior;
 - admin moderation command validation;
 - environment configuration parsing.
+- translation catalog completeness, locale fallback, and localized marketplace content handling.
 
 The seller and admin persistence flows have also been exercised locally against PostgreSQL using the seeded database.
 

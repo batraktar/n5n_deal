@@ -1,7 +1,9 @@
 import { AssetStatus, Prisma, UserRole, UserStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
+import { getBuyerProfileTranslationMap } from "@/features/i18n/content-repository";
 import { calculateAssetMatch } from "@/features/matching/matching-service";
+import { defaultLocale, type Locale } from "@/i18n/config";
 
 import { getDemoSeller } from "./seller-repository";
 
@@ -12,6 +14,7 @@ import type { SellerBuyerBudgetFilter, SellerBuyerSearch } from "./buyer-search"
 const buyerSelection = {
   buyerProfile: {
     select: {
+      id: true,
       budgetMax: true,
       budgetMin: true,
       companyName: true,
@@ -37,15 +40,30 @@ const matchingAssetSelection = {
 type BuyerRecord = Prisma.UserGetPayload<{ select: typeof buyerSelection }>;
 type MatchingAssetRecord = Prisma.AssetGetPayload<{ select: typeof matchingAssetSelection }>;
 
-function buildBuyerWhere(search: SellerBuyerSearch): Prisma.UserWhereInput {
+function buildBuyerWhere(search: SellerBuyerSearch, locale: Locale): Prisma.UserWhereInput {
   const profileWhere: Prisma.BuyerProfileWhereInput = {};
+  const locales = locale === defaultLocale ? [defaultLocale] : [locale, defaultLocale];
 
   if (search.industry !== undefined) {
-    profileWhere.industries = { has: search.industry };
+    profileWhere.OR = [
+      { industries: { has: search.industry } },
+      { translations: { some: { industries: { has: search.industry }, locale: { in: locales } } } },
+    ];
   }
 
   if (search.location !== undefined) {
-    profileWhere.preferredLocations = { has: search.location };
+    const locationFilter = {
+      OR: [
+        { preferredLocations: { has: search.location } },
+        { translations: { some: { locale: { in: locales }, preferredLocations: { has: search.location } } } },
+      ],
+    } satisfies Prisma.BuyerProfileWhereInput;
+    if (profileWhere.OR === undefined) {
+      profileWhere.OR = locationFilter.OR;
+    } else {
+      profileWhere.AND = [{ OR: profileWhere.OR }, locationFilter];
+      delete profileWhere.OR;
+    }
   }
 
   return {
@@ -63,7 +81,15 @@ function normalize(value: string): string {
   return value.trim().toLocaleLowerCase();
 }
 
-function matchesQuery(buyer: BuyerRecord, query: string | undefined): boolean {
+function matchesQuery(
+  buyer: BuyerRecord,
+  query: string | undefined,
+  translation: Readonly<{
+    readonly industries: readonly string[];
+    readonly interests: string;
+    readonly preferredLocations: readonly string[];
+  }> | undefined,
+): boolean {
   if (query === undefined) {
     return true;
   }
@@ -77,9 +103,9 @@ function matchesQuery(buyer: BuyerRecord, query: string | undefined): boolean {
   const searchableValues = [
     buyer.name,
     profile.companyName ?? "",
-    profile.interests,
-    ...profile.industries,
-    ...profile.preferredLocations,
+    translation?.interests ?? profile.interests,
+    ...(translation?.industries ?? profile.industries),
+    ...(translation?.preferredLocations ?? profile.preferredLocations),
   ];
 
   return searchableValues.some((value) => normalize(value).includes(normalizedQuery));
@@ -138,7 +164,15 @@ function matchesBudgetFilter(
   return budget === "COMPATIBLE" ? budgetCompatible : !budgetCompatible;
 }
 
-function toSellerBuyer(buyer: BuyerRecord, match: ReturnType<typeof bestMatch>): SellerBuyer {
+function toSellerBuyer(
+  buyer: BuyerRecord,
+  match: ReturnType<typeof bestMatch>,
+  translation: Readonly<{
+    readonly industries: readonly string[];
+    readonly interests: string;
+    readonly preferredLocations: readonly string[];
+  }> | undefined,
+): SellerBuyer {
   if (buyer.buyerProfile === null) {
     throw new Error("A buyer profile is required for the directory.");
   }
@@ -149,19 +183,22 @@ function toSellerBuyer(buyer: BuyerRecord, match: ReturnType<typeof bestMatch>):
     companyName: buyer.buyerProfile.companyName,
     currency: buyer.buyerProfile.currency,
     id: buyer.id,
-    industries: buyer.buyerProfile.industries,
-    interests: buyer.buyerProfile.interests,
+    industries: translation?.industries ?? buyer.buyerProfile.industries,
+    interests: translation?.interests ?? buyer.buyerProfile.interests,
     matchReasons: match?.reasons ?? [],
     matchScore: match?.score ?? null,
     name: buyer.name,
-    preferredLocations: buyer.buyerProfile.preferredLocations,
+    preferredLocations: translation?.preferredLocations ?? buyer.buyerProfile.preferredLocations,
   };
 }
 
-export async function getSellerBuyers(search: SellerBuyerSearch): Promise<readonly SellerBuyer[]> {
+export async function getSellerBuyers(
+  search: SellerBuyerSearch,
+  locale: Locale = defaultLocale,
+): Promise<readonly SellerBuyer[]> {
   const seller = await getDemoSeller();
   const [buyers, assets] = await Promise.all([
-    prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: buyerSelection, where: buildBuyerWhere(search) }),
+    prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: buyerSelection, where: buildBuyerWhere(search, locale) }),
     prisma.asset.findMany({
       orderBy: { updatedAt: "desc" },
       select: matchingAssetSelection,
@@ -169,22 +206,37 @@ export async function getSellerBuyers(search: SellerBuyerSearch): Promise<readon
     }),
   ]);
 
+  const translations = await getBuyerProfileTranslationMap(
+    buyers.flatMap((buyer) => buyer.buyerProfile === null ? [] : [buyer.buyerProfile.id]),
+    locale,
+  );
+
   return buyers
-    .filter((buyer) => matchesQuery(buyer, search.query))
-    .map((buyer) => ({ buyer, match: bestMatch(buyer, assets) }))
+    .filter((buyer) => matchesQuery(
+      buyer,
+      search.query,
+      buyer.buyerProfile === null ? undefined : translations.get(buyer.buyerProfile.id),
+    ))
+    .map((buyer) => ({
+      buyer,
+      match: bestMatch(buyer, assets),
+      translation: buyer.buyerProfile === null ? undefined : translations.get(buyer.buyerProfile.id),
+    }))
     .filter(({ match }) => matchesBudgetFilter(match, search.budget))
-    .map(({ buyer, match }) => toSellerBuyer(buyer, match));
+    .map(({ buyer, match, translation }) => toSellerBuyer(buyer, match, translation));
 }
 
-export async function getSellerBuyerFilterOptions(): Promise<SellerBuyerFilterOptions> {
+export async function getSellerBuyerFilterOptions(locale: Locale = defaultLocale): Promise<SellerBuyerFilterOptions> {
   await getDemoSeller();
   const profiles = await prisma.buyerProfile.findMany({
-    select: { industries: true, preferredLocations: true },
+    select: { id: true, industries: true, preferredLocations: true },
     where: { user: { role: UserRole.BUYER, status: UserStatus.ACTIVE } },
   });
 
+  const translations = await getBuyerProfileTranslationMap(profiles.map((profile) => profile.id), locale);
+
   return {
-    industries: uniqueSorted(profiles.flatMap((profile) => profile.industries)),
-    locations: uniqueSorted(profiles.flatMap((profile) => profile.preferredLocations)),
+    industries: uniqueSorted(profiles.flatMap((profile) => translations.get(profile.id)?.industries ?? profile.industries)),
+    locations: uniqueSorted(profiles.flatMap((profile) => translations.get(profile.id)?.preferredLocations ?? profile.preferredLocations)),
   };
 }

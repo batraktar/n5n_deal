@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { adminAssetStatusOptions, parseAdminAssetSearch } from "@/features/admin/admin-validation";
 import { getAdminAssets } from "@/features/admin/admin-repository";
+import { resolveLocale } from "@/i18n/config";
 
 type AdminAssetsPageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -16,10 +17,10 @@ export const dynamic = "force-dynamic";
 export default async function AdminAssetsPage({ searchParams }: AdminAssetsPageProps) {
   const t = await getTranslations("admin");
   const filterT = await getTranslations("filters");
-  const locale = await getLocale();
+  const locale = resolveLocale(await getLocale());
   const parameters = await searchParams;
   const search = parseAdminAssetSearch(parameters);
-  const assets = await getAdminAssets(search);
+  const assets = await getAdminAssets(search, locale);
 
   return (
     <>
