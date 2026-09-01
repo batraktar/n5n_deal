@@ -1,6 +1,8 @@
-import { Prisma, UserRole, UserStatus } from "@/generated/prisma/client";
+import { Prisma, UserRole } from "@/generated/prisma/client";
 import type { AssetStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
+
+import { requireActiveRole } from "@/features/auth/authorization";
 
 import type { AssetFormValues } from "./asset-validation";
 import type { SellerAsset } from "./seller-types";
@@ -69,11 +71,9 @@ function toAssetData(input: AssetFormValues): SellerAssetWriteData {
 
 export async function getDemoSeller(): Promise<Readonly<{ id: string }>> {
   const seller = await prisma.user.findFirst({
-    select: { id: true },
+    select: { id: true, role: true, status: true },
     where: {
       email: demoSellerEmail,
-      role: UserRole.SELLER,
-      status: UserStatus.ACTIVE,
     },
   });
 
@@ -81,7 +81,8 @@ export async function getDemoSeller(): Promise<Readonly<{ id: string }>> {
     throw new DemoSellerUnavailableError();
   }
 
-  return seller;
+  requireActiveRole(seller, UserRole.SELLER);
+  return { id: seller.id };
 }
 
 export async function getSellerAssets(): Promise<readonly SellerAsset[]> {

@@ -1,6 +1,7 @@
-import { AssetStatus, Prisma, UserRole, UserStatus } from "@/generated/prisma/client";
+import { AssetStatus, Prisma, UserRole } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
+import { requireActiveRole } from "@/features/auth/authorization";
 import { calculateAssetMatch } from "@/features/matching/matching-service";
 
 import type { BuyerProfileFormValues } from "./buyer-profile-validation";
@@ -30,15 +31,16 @@ export class DemoBuyerUnavailableError extends Error {
 
 export async function getDemoBuyer(): Promise<Readonly<{ id: string }>> {
   const buyer = await prisma.user.findFirst({
-    select: { id: true },
-    where: { email: demoBuyerEmail, role: UserRole.BUYER, status: UserStatus.ACTIVE },
+    select: { id: true, role: true, status: true },
+    where: { email: demoBuyerEmail },
   });
 
   if (buyer === null) {
     throw new DemoBuyerUnavailableError();
   }
 
-  return buyer;
+  requireActiveRole(buyer, UserRole.BUYER);
+  return { id: buyer.id };
 }
 
 function toBuyerProfile(profile: {
