@@ -72,4 +72,23 @@ describe("calculateAssetMatch", () => {
       score: 75,
     });
   });
+
+  it("matches a preferred country to an asset city and country", () => {
+    const result = calculateAssetMatch(
+      { ...buyer, preferredLocations: ["United Kingdom"] },
+      {
+        currency: "USD",
+        description: "A profitable B2B workflow software business with recurring revenue.",
+        industry: "Software",
+        location: "London, United Kingdom",
+        title: "Ledgerline",
+        valuation: 2_000_000,
+      },
+    );
+
+    expect(result).toEqual({
+      reasons: ["Same industry", "Budget compatible", "Preferred location", "Matches acquisition interests"],
+      score: 100,
+    });
+  });
 });

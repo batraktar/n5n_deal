@@ -37,6 +37,16 @@ function includesPreference(preferences: readonly string[], value: string): bool
   return preferences.some((preference) => normalize(preference) === normalizedValue);
 }
 
+function includesLocationPreference(preferences: readonly string[], location: string): boolean {
+  const normalizedLocation = normalize(location);
+  return preferences.some((preference) => {
+    const normalizedPreference = normalize(preference);
+    return normalizedLocation === normalizedPreference
+      || normalizedLocation.includes(normalizedPreference)
+      || normalizedPreference.includes(normalizedLocation);
+  });
+}
+
 function hasCompatibleBudget(profile: MatchBuyerProfile, asset: MatchAsset): boolean {
   if (normalize(profile.currency) !== normalize(asset.currency)) {
     return false;
@@ -76,7 +86,7 @@ export function calculateAssetMatch(profile: MatchBuyerProfile, asset: MatchAsse
     reasons.push("Budget compatible");
   }
 
-  if (includesPreference(profile.preferredLocations, asset.location)) {
+  if (includesLocationPreference(profile.preferredLocations, asset.location)) {
     score += matchWeights.location;
     reasons.push("Preferred location");
   }
