@@ -5,6 +5,7 @@ import { calculateAssetMatch } from "@/features/matching/matching-service";
 const buyer = {
   budgetMax: 3_000_000,
   budgetMin: 1_000_000,
+  currency: "USD",
   industries: ["Software", "Fintech"],
   interests: "Profitable B2B workflow software with recurring revenue.",
   preferredLocations: ["London, United Kingdom", "Berlin, Germany"],
@@ -13,6 +14,7 @@ const buyer = {
 describe("calculateAssetMatch", () => {
   it("awards the full score when every buyer preference matches", () => {
     const result = calculateAssetMatch(buyer, {
+      currency: "USD",
       description: "A profitable B2B workflow software business with recurring revenue.",
       industry: "Software",
       location: "London, United Kingdom",
@@ -28,6 +30,7 @@ describe("calculateAssetMatch", () => {
 
   it("returns only the signals supported by the asset", () => {
     const result = calculateAssetMatch(buyer, {
+      currency: "USD",
       description: "A regional food distribution business.",
       industry: "Consumer",
       location: "Amsterdam, Netherlands",
@@ -42,6 +45,7 @@ describe("calculateAssetMatch", () => {
     const result = calculateAssetMatch(
       { ...buyer, budgetMax: null, industries: ["software"] },
       {
+        currency: "USD",
         description: "A workflow platform for finance teams.",
         industry: "Software",
         location: "Amsterdam, Netherlands",
@@ -51,5 +55,21 @@ describe("calculateAssetMatch", () => {
     );
 
     expect(result).toEqual({ reasons: ["Same industry", "Budget compatible", "Matches acquisition interests"], score: 80 });
+  });
+
+  it("does not compare budget values across currencies", () => {
+    const result = calculateAssetMatch(buyer, {
+      currency: "EUR",
+      description: "A profitable B2B workflow software business with recurring revenue.",
+      industry: "Software",
+      location: "London, United Kingdom",
+      title: "Ledgerline",
+      valuation: 2_000_000,
+    });
+
+    expect(result).toEqual({
+      reasons: ["Same industry", "Preferred location", "Matches acquisition interests"],
+      score: 75,
+    });
   });
 });

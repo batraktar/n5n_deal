@@ -113,11 +113,13 @@ export async function getBuyerRecommendations(): Promise<readonly BuyerRecommend
         {
           budgetMax: profile.budgetMax === null ? null : Number(profile.budgetMax),
           budgetMin: profile.budgetMin === null ? null : Number(profile.budgetMin),
+          currency: profile.currency,
           industries: profile.industries,
           interests: profile.interests,
           preferredLocations: profile.preferredLocations,
         },
         {
+          currency: asset.currency,
           description: asset.description,
           industry: asset.industry,
           location: asset.location,

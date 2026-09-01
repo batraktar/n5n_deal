@@ -1,12 +1,14 @@
 export type MatchBuyerProfile = Readonly<{
   budgetMax: number | null;
   budgetMin: number | null;
+  currency: string;
   industries: readonly string[];
   interests: string;
   preferredLocations: readonly string[];
 }>;
 
 export type MatchAsset = Readonly<{
+  currency: string;
   description: string;
   industry: string;
   location: string;
@@ -35,12 +37,16 @@ function includesPreference(preferences: readonly string[], value: string): bool
   return preferences.some((preference) => normalize(preference) === normalizedValue);
 }
 
-function hasCompatibleBudget(profile: MatchBuyerProfile, valuation: number): boolean {
-  if (profile.budgetMin !== null && valuation < profile.budgetMin) {
+function hasCompatibleBudget(profile: MatchBuyerProfile, asset: MatchAsset): boolean {
+  if (normalize(profile.currency) !== normalize(asset.currency)) {
     return false;
   }
 
-  if (profile.budgetMax !== null && valuation > profile.budgetMax) {
+  if (profile.budgetMin !== null && asset.valuation < profile.budgetMin) {
+    return false;
+  }
+
+  if (profile.budgetMax !== null && asset.valuation > profile.budgetMax) {
     return false;
   }
 
@@ -65,7 +71,7 @@ export function calculateAssetMatch(profile: MatchBuyerProfile, asset: MatchAsse
     reasons.push("Same industry");
   }
 
-  if (hasCompatibleBudget(profile, asset.valuation)) {
+  if (hasCompatibleBudget(profile, asset)) {
     score += matchWeights.budget;
     reasons.push("Budget compatible");
   }
