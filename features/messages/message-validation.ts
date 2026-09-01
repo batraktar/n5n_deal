@@ -6,6 +6,16 @@ export const buyerMessageFormSchema = z.object({
 
 export type BuyerMessageFormValues = z.infer<typeof buyerMessageFormSchema>;
 
+export type BuyerMessageActionState = Readonly<{
+  kind: "idle" | "validation_error" | "error" | "success";
+  message: string | null;
+}>;
+
+export const initialBuyerMessageActionState: BuyerMessageActionState = {
+  kind: "idle",
+  message: null,
+};
+
 function readFormField(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
   return typeof value === "string" ? value : undefined;

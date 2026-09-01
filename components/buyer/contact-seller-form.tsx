@@ -5,8 +5,7 @@ import { startTransition, useActionState } from "react";
 import { useForm } from "react-hook-form";
 
 import { sendBuyerMessageAction } from "@/features/messages/actions";
-import { initialBuyerMessageActionState } from "@/features/messages/buyer-message-service";
-import { buyerMessageFormSchema } from "@/features/messages/message-validation";
+import { buyerMessageFormSchema, initialBuyerMessageActionState } from "@/features/messages/message-validation";
 
 import type { BuyerMessageFormValues } from "@/features/messages/message-validation";
 

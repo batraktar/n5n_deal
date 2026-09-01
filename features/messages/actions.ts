@@ -3,7 +3,7 @@
 import { createBuyerMessage } from "./buyer-message-service";
 import { parseBuyerMessageFormData } from "./message-validation";
 
-import type { BuyerMessageActionState } from "./buyer-message-service";
+import type { BuyerMessageActionState } from "./message-validation";
 
 function readAssetId(formData: FormData): string | undefined {
   const value = formData.get("assetId");

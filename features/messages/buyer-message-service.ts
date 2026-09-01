@@ -4,15 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getDemoBuyer } from "@/features/buyer/buyer-repository";
 import { canBuyerContactSeller } from "./message-validation";
 
-export type BuyerMessageActionState = Readonly<{
-  kind: "idle" | "validation_error" | "error" | "success";
-  message: string | null;
-}>;
-
-export const initialBuyerMessageActionState: BuyerMessageActionState = {
-  kind: "idle",
-  message: null,
-};
+import type { BuyerMessageActionState } from "./message-validation";
 
 export async function createBuyerMessage(assetId: string, content: string): Promise<BuyerMessageActionState> {
   const buyer = await getDemoBuyer();
