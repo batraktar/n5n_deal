@@ -17,6 +17,7 @@ N5Deal helps investors discover quality business opportunities and gives sellers
 - Content: `--color-ink`, `--color-muted`, and `--color-border`.
 - Action: `--color-accent` with `--color-accent-strong` for hover.
 - Status highlight: `--color-positive`.
+- Validation feedback: `--color-danger` for field and form errors.
 - Spacing uses a four-pixel rhythm; page sections use 56px, 80px, or 112px vertical spacing.
 - Type uses the system sans stack; display text is tight, compact, and high-contrast.
 
