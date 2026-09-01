@@ -4,11 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LinkButton } from "@/components/ui/link-button";
 
-const marketplaceSignals = [
-  ["€1M–€25M", "value"],
-  ["3 roles", "roles"],
-  ["One place", "conversations"],
-] as const;
+const marketplaceSignalKeys = ["value", "roles", "conversations"] as const;
 
 export default async function HomePage() {
   const t = await getTranslations("home");
@@ -36,10 +32,10 @@ export default async function HomePage() {
             </div>
             <p className="signal-card__title">{t("snapshotTitle")}</p>
             <dl className="signal-list">
-              {marketplaceSignals.map(([value, labelKey]) => (
+              {marketplaceSignalKeys.map((labelKey) => (
                 <div key={labelKey}>
                   <dt>{t(`signals.${labelKey}`)}</dt>
-                  <dd>{value}</dd>
+                  <dd>{t(`signals.${labelKey}Display`)}</dd>
                 </div>
               ))}
             </dl>

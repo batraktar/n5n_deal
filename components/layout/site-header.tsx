@@ -16,6 +16,15 @@ const navigationItems = [
 
 export async function SiteHeader() {
   const t = await getTranslations("navigation");
+  const renderNavigationLinks = (variant: "desktop" | "mobile") => (
+    <div className={`site-nav__links site-nav__links--${variant}`}>
+      {navigationItems.map(([href, key]) => (
+        <Link href={href} key={href}>
+          {t(key)}
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <header className="site-header">
@@ -23,13 +32,11 @@ export async function SiteHeader() {
         <Link aria-label={t("home")} className="brand-link" href="/">
           <N5DealMark />
         </Link>
-        <div className="site-nav__links">
-          {navigationItems.map(([href, key]) => (
-            <Link href={href} key={href}>
-              {t(key)}
-            </Link>
-          ))}
-        </div>
+        {renderNavigationLinks("desktop")}
+        <details className="site-nav__menu">
+          <summary>{t("menu")}</summary>
+          {renderNavigationLinks("mobile")}
+        </details>
         <div className="site-nav__actions">
           <LanguageSwitcher />
           <Link className="site-nav__cta" href="/#contact">
