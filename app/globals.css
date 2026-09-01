@@ -406,6 +406,153 @@ a:focus-visible {
   }
 }
 
+.admin-management {
+  min-height: calc(100vh - 153px);
+  padding-bottom: 96px;
+  padding-top: 80px;
+}
+
+.admin-management h1 {
+  font-size: clamp(40px, 5.5vw, 64px);
+}
+
+.admin-filter-form {
+  align-items: end;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  margin: 40px 0 24px;
+  padding: 20px;
+}
+
+.admin-filter-form--assets {
+  grid-template-columns: 2fr 1fr auto;
+}
+
+.admin-filter-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-filter-form span,
+.admin-filter-form button,
+.admin-table {
+  font-size: 13px;
+}
+
+.admin-filter-form input,
+.admin-filter-form select,
+.admin-status-form select {
+  background: white;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.admin-filter-form button,
+.admin-status-form button {
+  background: var(--color-accent);
+  border: 0;
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 40px;
+  padding: 10px 14px;
+}
+
+.admin-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.admin-table {
+  border-collapse: collapse;
+  min-width: 850px;
+  width: 100%;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: var(--color-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-table td > strong,
+.admin-table td > span {
+  display: block;
+}
+
+.admin-table td > span {
+  color: var(--color-muted);
+  margin-top: 5px;
+}
+
+.admin-status {
+  border: 1px solid var(--color-border);
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 6px 8px;
+}
+
+.admin-status--active,
+.admin-status--published {
+  background: color-mix(in srgb, var(--color-positive) 20%, var(--color-surface));
+  color: var(--color-accent-strong);
+}
+
+.admin-status--suspended,
+.admin-status--archived {
+  color: var(--color-danger);
+}
+
+.admin-status-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-status-form select,
+.admin-status-form button {
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.admin-status-form span {
+  color: var(--color-muted);
+  flex-basis: 100%;
+  font-size: 12px;
+}
+
+@media (max-width: 800px) {
+  .admin-filter-form,
+  .admin-filter-form--assets {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-management {
+    padding-bottom: 72px;
+    padding-top: 56px;
+  }
+}
+
 .admin-dashboard {
   min-height: calc(100vh - 153px);
   padding-bottom: 96px;
