@@ -50,5 +50,5 @@ N5Deal helps investors discover quality business opportunities and gives sellers
 
 ## 7. Accepted debt
 
-- Marketplace listing, authentication, dashboards, form/error states, and data visualizations belong to future product phases.
+- Full authentication, buyer/seller discovery beyond the current contact flow, richer messaging, and data visualizations remain future product phases.
 - The foundation does not load remote fonts or imagery; this keeps the first render fast and avoids an external asset dependency.

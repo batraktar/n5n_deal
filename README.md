@@ -31,7 +31,7 @@ Recommendations use a deterministic score out of 100:
 
 - 35 points for an industry match;
 - 20 points for a preferred location;
-- 25 points for a compatible budget range;
+- 25 points for a compatible budget range in the same currency;
 - 20 points when acquisition-interest keywords appear in the asset title or description.
 
 Each recommendation exposes the reasons that contributed to its score. The matching service is isolated in `features/matching/` so it can later be replaced by a more advanced model without changing the page layer.
