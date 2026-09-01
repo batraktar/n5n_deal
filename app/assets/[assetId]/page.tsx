@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ContactSellerForm } from "@/components/buyer/contact-seller-form";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getPublishedAssetById } from "@/features/assets/asset-repository";
@@ -26,10 +27,6 @@ export default async function AssetDetailsPage({ params }: AssetDetailsPageProps
   if (asset === null) {
     notFound();
   }
-
-  const emailSubject = encodeURIComponent(`N5Deal enquiry: ${asset.title}`);
-  const emailBody = encodeURIComponent(`Hello ${asset.sellerName},\n\nI would like to learn more about ${asset.title}.`);
-  const contactHref = `mailto:${asset.sellerEmail}?subject=${emailSubject}&body=${emailBody}`;
 
   return (
     <div>
@@ -63,9 +60,7 @@ export default async function AssetDetailsPage({ params }: AssetDetailsPageProps
                 <dd>{asset.sellerName}</dd>
               </div>
             </dl>
-            <a className="link-button link-button--primary" href={contactHref}>
-              Contact seller
-            </a>
+            <ContactSellerForm assetId={asset.id} />
           </aside>
         </div>
       </main>
