@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -15,18 +16,23 @@ type SellerBuyersPageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
 }>;
 
-function budgetLabel(option: (typeof sellerBuyerBudgetOptions)[number]): string {
+function budgetLabel(
+  option: (typeof sellerBuyerBudgetOptions)[number],
+  translate: (key: "allBudgets" | "compatible" | "incompatible") => string,
+): string {
   switch (option) {
     case "ALL":
-      return "Any budget compatibility";
+      return translate("allBudgets");
     case "COMPATIBLE":
-      return "Budget compatible";
+      return translate("compatible");
     case "INCOMPATIBLE":
-      return "Budget not compatible";
+      return translate("incompatible");
   }
 }
 
 export default async function SellerBuyersPage({ searchParams }: SellerBuyersPageProps) {
+  const t = await getTranslations("seller");
+  const filterT = await getTranslations("filters");
   const parameters = await searchParams;
   const search = parseSellerBuyerSearchParameters(parameters);
   const [buyers, filters] = await Promise.all([getSellerBuyers(search), getSellerBuyerFilterOptions()]);
@@ -35,46 +41,46 @@ export default async function SellerBuyersPage({ searchParams }: SellerBuyersPag
     <>
       <SiteHeader />
       <main className="seller-buyers container">
-        <Link className="back-link" href="/seller/dashboard">← Seller dashboard</Link>
+        <Link className="back-link" href="/seller/dashboard">← {t("assetBack")}</Link>
         <div className="seller-buyers__heading">
           <div>
-            <p className="eyebrow">Buyer directory</p>
-            <h1>Find aligned buyers.</h1>
-            <p>Browse active investor profiles, compare their preferences, and start a focused conversation.</p>
+            <p className="eyebrow">{t("buyerDirectory")}</p>
+            <h1>{t("buyers")}</h1>
+            <p>{t("buyersDescription")}</p>
           </div>
-          <Link className="link-button link-button--secondary" href="/seller/assets/new">Create asset</Link>
+          <Link className="link-button link-button--secondary" href="/seller/assets/new">{t("createAsset")}</Link>
         </div>
         <form className="seller-buyers__filters" method="get">
           <label>
-            <span>Search</span>
-            <input defaultValue={search.query} name="query" placeholder="Name, interest, industry, or location" />
+            <span>{filterT("search")}</span>
+            <input defaultValue={search.query} name="query" placeholder={filterT("buyerPlaceholder")} />
           </label>
           <label>
-            <span>Industry</span>
+            <span>{filterT("industry")}</span>
             <select defaultValue={search.industry} name="industry">
-              <option value="">All industries</option>
+              <option value="">{filterT("allIndustries")}</option>
               {filters.industries.map((industry) => <option key={industry} value={industry}>{industry}</option>)}
             </select>
           </label>
           <label>
-            <span>Location</span>
+            <span>{filterT("location")}</span>
             <select defaultValue={search.location} name="location">
-              <option value="">All locations</option>
+              <option value="">{filterT("allLocations")}</option>
               {filters.locations.map((location) => <option key={location} value={location}>{location}</option>)}
             </select>
           </label>
           <label>
-            <span>Budget</span>
+            <span>{filterT("budget")}</span>
             <select defaultValue={search.budget} name="budget">
-              {sellerBuyerBudgetOptions.map((option) => <option key={option} value={option}>{budgetLabel(option)}</option>)}
+              {sellerBuyerBudgetOptions.map((option) => <option key={option} value={option}>{budgetLabel(option, filterT)}</option>)}
             </select>
           </label>
-          <button type="submit">Apply filters</button>
+          <button type="submit">{filterT("apply")}</button>
         </form>
         <section aria-live="polite" className="seller-buyers__results">
           <div className="seller-buyers__result-summary">
-            <p>{buyers.length} active buyer profile{buyers.length === 1 ? "" : "s"}</p>
-            <Link href="/seller/buyers">Clear filters</Link>
+            <p>{t("buyerCount", { count: buyers.length })}</p>
+            <Link href="/seller/buyers">{t("clearBuyerFilters")}</Link>
           </div>
           {buyers.length > 0 ? (
             <div className="seller-buyer-grid">
@@ -82,9 +88,9 @@ export default async function SellerBuyersPage({ searchParams }: SellerBuyersPag
             </div>
           ) : (
             <div className="empty-state">
-              <h2>No buyers match these filters.</h2>
-              <p>Try a broader search or publish an asset to enable budget matching.</p>
-              <Link href="/seller/buyers">Reset buyer filters</Link>
+              <h2>{t("emptyBuyersTitle")}</h2>
+              <p>{t("emptyBuyersDescription")}</p>
+              <Link href="/seller/buyers">{t("resetBuyerFilters")}</Link>
             </div>
           )}
         </section>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { parseBuyerProfileFormData } from "./buyer-profile-validation";
@@ -8,7 +9,10 @@ import { saveBuyerProfile } from "./buyer-repository";
 
 import type { BuyerProfileFormState } from "./buyer-types";
 
-function validationFailureState(fieldErrors: Readonly<Record<string, readonly string[] | undefined>>): BuyerProfileFormState {
+function validationFailureState(
+  fieldErrors: Readonly<Record<string, readonly string[] | undefined>>,
+  message: string,
+): BuyerProfileFormState {
   return {
     fieldErrors: {
       budgetMax: fieldErrors["budgetMax"]?.[0],
@@ -20,7 +24,7 @@ function validationFailureState(fieldErrors: Readonly<Record<string, readonly st
       preferredLocations: fieldErrors["preferredLocations"]?.[0],
     },
     kind: "validation_error",
-    message: "Review the highlighted fields.",
+    message,
   };
 }
 
@@ -28,16 +32,18 @@ export async function saveBuyerProfileAction(
   _previousState: BuyerProfileFormState,
   formData: FormData,
 ): Promise<BuyerProfileFormState> {
+  const validationT = await getTranslations("validation");
+  const errorsT = await getTranslations("errors");
   const parsed = parseBuyerProfileFormData(formData);
   if (!parsed.success) {
-    return validationFailureState(parsed.error.flatten().fieldErrors);
+    return validationFailureState(parsed.error.flatten().fieldErrors, validationT("reviewFields"));
   }
 
   try {
     await saveBuyerProfile(parsed.data);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return { fieldErrors: {}, kind: "error", message: "We could not save your preferences. Please try again." };
+      return { fieldErrors: {}, kind: "error", message: errorsT("savePreferences") };
     }
 
     throw error;

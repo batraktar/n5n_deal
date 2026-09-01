@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { AssetCard } from "@/components/assets/asset-card";
 import { AssetFilterForm } from "@/components/assets/asset-filter-form";
@@ -14,6 +15,7 @@ type MarketplacePageProps = Readonly<{
 }>;
 
 export default async function MarketplacePage({ searchParams }: MarketplacePageProps) {
+  const t = await getTranslations("marketplace");
   const search = parseAssetSearchParameters(await searchParams);
   const [listing, filters] = await Promise.all([
     getPublishedAssetListing(search),
@@ -25,15 +27,15 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
       <SiteHeader />
       <main className="marketplace container">
         <header className="marketplace__heading">
-          <p className="eyebrow">Marketplace</p>
-          <h1>Explore acquisition opportunities with more context.</h1>
-          <p>Search the current published marketplace by business profile, industry, and location.</p>
+          <p className="eyebrow">{t("eyebrow")}</p>
+          <h1>{t("title")}</h1>
+          <p>{t("description")}</p>
         </header>
         <AssetFilterForm filters={filters} search={search} />
         <section aria-live="polite" className="marketplace__results">
           <div className="marketplace__result-summary">
-            <p>{listing.total} published opportunities</p>
-            <Link href="/marketplace">Clear filters</Link>
+            <p>{t("results", { count: listing.total })}</p>
+            <Link href="/marketplace">{t("clearFilters")}</Link>
           </div>
           {listing.assets.length > 0 ? (
             <div className="asset-grid">
@@ -43,19 +45,19 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
             </div>
           ) : (
             <div className="empty-state">
-              <h2>No opportunities match these filters.</h2>
-              <p>Try a broader industry, location, or keyword search.</p>
-              <Link href="/marketplace">Reset marketplace filters</Link>
+              <h2>{t("emptyTitle")}</h2>
+              <p>{t("emptyDescription")}</p>
+              <Link href="/marketplace">{t("resetFilters")}</Link>
             </div>
           )}
           {listing.pageCount > 1 ? (
-            <nav aria-label="Marketplace pages" className="pagination">
-              {listing.page > 1 ? <Link href={createMarketplaceHref(search, listing.page - 1)}>Previous</Link> : null}
+            <nav aria-label={t("pages")} className="pagination">
+              {listing.page > 1 ? <Link href={createMarketplaceHref(search, listing.page - 1)}>{t("previous")}</Link> : null}
               <span>
-                Page {listing.page} of {listing.pageCount}
+                {t("pageOf", { page: listing.page, pageCount: listing.pageCount })}
               </span>
               {listing.page < listing.pageCount ? (
-                <Link href={createMarketplaceHref(search, listing.page + 1)}>Next</Link>
+                <Link href={createMarketplaceHref(search, listing.page + 1)}>{t("next")}</Link>
               ) : null}
             </nav>
           ) : null}

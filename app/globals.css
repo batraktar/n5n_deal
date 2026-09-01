@@ -53,6 +53,7 @@ a {
 
 .site-nav,
 .site-nav__links,
+.site-nav__actions,
 .hero__actions,
 .site-footer__content,
 .brand-mark {
@@ -96,6 +97,28 @@ a {
 .site-nav__links a:hover,
 .text-link:hover {
   color: var(--color-accent);
+}
+
+.site-nav__actions {
+  gap: 12px;
+}
+
+.language-switcher select {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 42px;
+  padding: 0 10px;
+}
+
+.language-switcher select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .site-nav__cta,
@@ -363,6 +386,14 @@ a:focus-visible {
 
   .site-nav__cta {
     margin-left: auto;
+  }
+
+  .site-nav__actions {
+    margin-left: auto;
+  }
+
+  .site-nav__actions .site-nav__cta {
+    margin-left: 0;
   }
 }
 

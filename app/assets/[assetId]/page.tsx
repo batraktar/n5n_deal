@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { ContactSellerForm } from "@/components/buyer/contact-seller-form";
@@ -12,8 +13,8 @@ type AssetDetailsPageProps = Readonly<{
   params: Promise<Readonly<{ assetId: string }>>;
 }>;
 
-function formatCurrency(value: string, currency: string): string {
-  return new Intl.NumberFormat("en-US", {
+function formatCurrency(value: string, currency: string, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     currency,
     maximumFractionDigits: 0,
     style: "currency",
@@ -21,6 +22,8 @@ function formatCurrency(value: string, currency: string): string {
 }
 
 export default async function AssetDetailsPage({ params }: AssetDetailsPageProps) {
+  const t = await getTranslations("asset");
+  const locale = await getLocale();
   const { assetId } = await params;
   const asset = await getPublishedAssetById(assetId);
 
@@ -33,7 +36,7 @@ export default async function AssetDetailsPage({ params }: AssetDetailsPageProps
       <SiteHeader />
       <main className="asset-details container">
         <Link className="back-link" href="/marketplace">
-          Back to marketplace
+          {t("backMarketplace")}
         </Link>
         <div className="asset-details__layout">
           <article className="asset-details__content">
@@ -41,22 +44,22 @@ export default async function AssetDetailsPage({ params }: AssetDetailsPageProps
             <h1>{asset.title}</h1>
             <p className="asset-details__location">{asset.location}</p>
             <div className="asset-details__description">
-              <h2>Company overview</h2>
+              <h2>{t("companyOverview")}</h2>
               <p>{asset.description}</p>
             </div>
           </article>
           <aside className="asset-details__panel">
             <dl>
               <div>
-                <dt>Asking valuation</dt>
-                <dd>{formatCurrency(asset.valuation, asset.currency)}</dd>
+                <dt>{t("askingValuation")}</dt>
+                <dd>{formatCurrency(asset.valuation, asset.currency, locale)}</dd>
               </div>
               <div>
-                <dt>Annual revenue</dt>
-                <dd>{asset.revenue === null ? "Not disclosed" : formatCurrency(asset.revenue, asset.currency)}</dd>
+                <dt>{t("annualRevenue")}</dt>
+                <dd>{asset.revenue === null ? t("notDisclosed") : formatCurrency(asset.revenue, asset.currency, locale)}</dd>
               </div>
               <div>
-                <dt>Listed by</dt>
+                <dt>{t("listedBy")}</dt>
                 <dd>{asset.sellerName}</dd>
               </div>
             </dl>

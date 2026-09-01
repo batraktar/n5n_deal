@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const buyerMessageFormSchema = z.object({
-  content: z.string().trim().min(10, "Write at least 10 characters.").max(1_000),
+  content: z.string().trim().min(10, "messageMin").max(1_000, "messageMax"),
 });
 
-const requiredBuyerId = z.string().trim().min(1, "A buyer is required.").max(64);
+const requiredBuyerId = z.string().trim().min(1, "buyerRequired").max(64);
 
 export const sellerMessageFormSchema = z.object({
   buyerId: requiredBuyerId,
-  content: z.string().trim().min(10, "Write at least 10 characters.").max(1_000),
+  content: z.string().trim().min(10, "messageMin").max(1_000, "messageMax"),
 });
 
 export type BuyerMessageFormValues = z.infer<typeof buyerMessageFormSchema>;

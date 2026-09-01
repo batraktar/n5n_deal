@@ -4,7 +4,7 @@ export const adminRoleFilterOptions = ["ALL", "BUYER", "SELLER", "ADMIN"] as con
 export const adminUserStatusOptions = ["ACTIVE", "SUSPENDED"] as const;
 export const adminAssetStatusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
 
-const requiredId = z.string().trim().min(1, "A record identifier is required.").max(64);
+const requiredId = z.string().trim().min(1, "recordRequired").max(64);
 
 const adminUserStatusFormSchema = z.object({
   status: z.enum(adminUserStatusOptions),

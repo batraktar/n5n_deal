@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 
 import { parseAdminAssetStatusFormData, parseAdminUserStatusFormData } from "./admin-validation";
 import { updateAdminAssetStatus, updateAdminUserStatus } from "./admin-repository";
@@ -11,19 +12,21 @@ export async function updateAdminUserStatusAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const errorsT = await getTranslations("errors");
+  const adminT = await getTranslations("admin");
   const parsed = parseAdminUserStatusFormData(formData);
   if (!parsed.success) {
-    return { kind: "validation_error", message: "Choose a valid user status." };
+    return { kind: "validation_error", message: errorsT("validUserStatus") };
   }
 
   try {
     const updated = await updateAdminUserStatus(parsed.data.userId, parsed.data.status);
     if (!updated) {
-      return { kind: "error", message: "This user is unavailable or cannot be modified." };
+      return { kind: "error", message: errorsT("userUnavailable") };
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return { kind: "error", message: "We could not update this user. Please try again." };
+      return { kind: "error", message: errorsT("updateUser") };
     }
 
     throw error;
@@ -31,26 +34,28 @@ export async function updateAdminUserStatusAction(
 
   revalidatePath("/admin");
   revalidatePath("/admin/users");
-  return { kind: "success", message: "User status updated." };
+  return { kind: "success", message: adminT("userStatusUpdated") };
 }
 
 export async function updateAdminAssetStatusAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const errorsT = await getTranslations("errors");
+  const adminT = await getTranslations("admin");
   const parsed = parseAdminAssetStatusFormData(formData);
   if (!parsed.success) {
-    return { kind: "validation_error", message: "Choose a valid asset status." };
+    return { kind: "validation_error", message: errorsT("validAssetStatusAdmin") };
   }
 
   try {
     const updated = await updateAdminAssetStatus(parsed.data.assetId, parsed.data.status);
     if (!updated) {
-      return { kind: "error", message: "This asset is unavailable." };
+      return { kind: "error", message: errorsT("assetUnavailableAdmin") };
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return { kind: "error", message: "We could not update this asset. Please try again." };
+      return { kind: "error", message: errorsT("updateAsset") };
     }
 
     throw error;
@@ -59,5 +64,5 @@ export async function updateAdminAssetStatusAction(
   revalidatePath("/admin");
   revalidatePath("/admin/assets");
   revalidatePath("/marketplace");
-  return { kind: "success", message: "Asset status updated." };
+  return { kind: "success", message: adminT("assetStatusUpdated") };
 }

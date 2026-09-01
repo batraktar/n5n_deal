@@ -1,17 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type DataErrorStateProps = Readonly<{
   reset: () => void;
 }>;
 
 export function DataErrorState({ reset }: DataErrorStateProps) {
+  const t = useTranslations("errors");
+
   return (
     <main className="data-error container">
-      <p className="eyebrow">Marketplace unavailable</p>
-      <h1>We could not load opportunities right now.</h1>
-      <p>Please check the database connection and try again.</p>
+      <p className="eyebrow">{t("dataUnavailableEyebrow")}</p>
+      <h1>{t("dataUnavailableTitle")}</h1>
+      <p>{t("dataUnavailableDescription")}</p>
       <button onClick={reset} type="button">
-        Try again
+        {t("tryAgain")}
       </button>
     </main>
   );

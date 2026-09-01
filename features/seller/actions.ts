@@ -2,29 +2,33 @@
 
 import { Prisma } from "@/generated/prisma/client";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { parseAssetFormData, parseAssetStatusFormData, readAssetId } from "./asset-validation";
 import { createSellerAsset, updateSellerAsset, updateSellerAssetStatus } from "./seller-repository";
 import type { SellerAssetFormState } from "./seller-types";
 
-function databaseFailureState(error: unknown): SellerAssetFormState {
+function databaseFailureState(error: unknown, translate: (key: string) => string): SellerAssetFormState {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
     return {
-      fieldErrors: { title: "You already have an asset with this title." },
+      fieldErrors: { title: translate("duplicateAsset") },
       kind: "validation_error",
-      message: "Choose a different title.",
+      message: translate("chooseDifferentTitle"),
     };
   }
 
   return {
     fieldErrors: {},
     kind: "error",
-    message: "We could not save this asset. Please try again.",
+    message: translate("saveAsset"),
   };
 }
 
-function validationFailureState(fieldErrors: Readonly<Record<string, readonly string[] | undefined>>): SellerAssetFormState {
+function validationFailureState(
+  fieldErrors: Readonly<Record<string, readonly string[] | undefined>>,
+  message: string,
+): SellerAssetFormState {
   return {
     fieldErrors: {
       currency: fieldErrors["currency"]?.[0],
@@ -37,7 +41,7 @@ function validationFailureState(fieldErrors: Readonly<Record<string, readonly st
       valuation: fieldErrors["valuation"]?.[0],
     },
     kind: "validation_error",
-    message: "Review the highlighted fields.",
+    message,
   };
 }
 
@@ -52,9 +56,11 @@ export async function saveSellerAssetAction(
   _previousState: SellerAssetFormState,
   formData: FormData,
 ): Promise<SellerAssetFormState> {
+  const errorsT = await getTranslations("errors");
+  const validationT = await getTranslations("validation");
   const parsed = parseAssetFormData(formData);
   if (!parsed.success) {
-    return validationFailureState(parsed.error.flatten().fieldErrors);
+    return validationFailureState(parsed.error.flatten().fieldErrors, validationT("reviewFields"));
   }
 
   const assetId = readAssetId(formData);
@@ -71,7 +77,7 @@ export async function saveSellerAssetAction(
         return {
           fieldErrors: {},
           kind: "error",
-          message: "This asset is unavailable or does not belong to the current seller.",
+          message: errorsT("assetUnavailable"),
         };
       }
 
@@ -79,7 +85,7 @@ export async function saveSellerAssetAction(
       destination = "/seller/dashboard?notice=updated";
     }
   } catch (error: unknown) {
-    return databaseFailureState(error);
+    return databaseFailureState(error, errorsT);
   }
 
   redirect(destination);
@@ -89,15 +95,16 @@ export async function changeSellerAssetStatusAction(
   previousState: SellerAssetFormState,
   formData: FormData,
 ): Promise<SellerAssetFormState> {
+  const errorsT = await getTranslations("errors");
   void previousState;
   const assetId = readAssetId(formData);
   const parsed = parseAssetStatusFormData(formData);
 
   if (assetId === undefined || !parsed.success) {
     return {
-      fieldErrors: parsed.success ? {} : validationFailureState(parsed.error.flatten().fieldErrors).fieldErrors,
+      fieldErrors: parsed.success ? {} : validationFailureState(parsed.error.flatten().fieldErrors, errorsT("validAssetStatus")).fieldErrors,
       kind: "validation_error",
-      message: "Choose a valid asset status.",
+      message: errorsT("validAssetStatus"),
     };
   }
 
@@ -107,13 +114,13 @@ export async function changeSellerAssetStatusAction(
       return {
         fieldErrors: {},
         kind: "error",
-        message: "This asset is unavailable or does not belong to the current seller.",
+        message: errorsT("assetUnavailable"),
       };
     }
 
     refreshAssetPaths(assetId);
   } catch (error: unknown) {
-    return databaseFailureState(error);
+    return databaseFailureState(error, errorsT);
   }
 
   redirect("/seller/dashboard?notice=status-updated");

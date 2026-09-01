@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const optionalPositiveNumber = z.preprocess(
   (value) => (value === "" || value === undefined ? undefined : value),
-  z.coerce.number().positive("Budget must be greater than zero.").max(100_000_000_000).optional(),
+  z.coerce.number().positive("budgetPositive").max(100_000_000_000).optional(),
 );
 
 function toPreferenceList(value: string): string[] {
@@ -14,20 +14,20 @@ export const buyerProfileFormSchema = z.object({
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.string().trim().min(2).max(120).optional(),
   ),
-  interests: z.string().trim().min(20, "Describe your acquisition interests in at least 20 characters.").max(2_000),
-  industries: z.string().trim().min(2, "Add at least one industry.").transform(toPreferenceList).pipe(z.array(z.string()).min(1)),
-  preferredLocations: z.string().trim().min(2, "Add at least one location.").transform(toPreferenceList).pipe(z.array(z.string()).min(1)),
+  interests: z.string().trim().min(20, "interestsMin").max(2_000, "interestsMax"),
+  industries: z.string().trim().min(2, "industryList").transform(toPreferenceList).pipe(z.array(z.string()).min(1, "industryList")),
+  preferredLocations: z.string().trim().min(2, "locationList").transform(toPreferenceList).pipe(z.array(z.string()).min(1, "locationList")),
   budgetMin: optionalPositiveNumber,
   budgetMax: optionalPositiveNumber,
   currency: z.preprocess(
     (value) => (typeof value === "string" ? value.trim().toUpperCase() : value),
-    z.string().length(3).regex(/^[A-Z]{3}$/, "Use a three-letter currency code.").default("USD"),
+    z.string().length(3).regex(/^[A-Z]{3}$/, "currencyCode").default("USD"),
   ),
 }).superRefine((data, context) => {
   if (data.budgetMin !== undefined && data.budgetMax !== undefined && data.budgetMin > data.budgetMax) {
     context.addIssue({
       code: "custom",
-      message: "Minimum budget cannot exceed maximum budget.",
+      message: "budgetOrder",
       path: ["budgetMax"],
     });
   }

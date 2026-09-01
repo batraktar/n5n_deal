@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 
 import { updateAdminAssetStatusAction } from "@/features/admin/actions";
 import { adminAssetStatusOptions, initialAdminActionState } from "@/features/admin/admin-validation";
@@ -12,27 +13,17 @@ type AdminAssetStatusFormProps = Readonly<{
   status: AssetStatus;
 }>;
 
-function statusLabel(status: AssetStatus): string {
-  switch (status) {
-    case "DRAFT":
-      return "Draft";
-    case "PUBLISHED":
-      return "Published";
-    case "ARCHIVED":
-      return "Archived";
-  }
-}
-
 export function AdminAssetStatusForm({ assetId, status }: AdminAssetStatusFormProps) {
+  const t = useTranslations("admin");
   const [state, action, isPending] = useActionState(updateAdminAssetStatusAction, initialAdminActionState);
 
   return (
     <form action={action} className="admin-status-form">
       <input name="assetId" type="hidden" value={assetId} />
       <select defaultValue={status} name="status">
-        {adminAssetStatusOptions.map((option) => <option key={option} value={option}>{statusLabel(option)}</option>)}
+        {adminAssetStatusOptions.map((option) => <option key={option} value={option}>{option === "DRAFT" ? t("draft") : option === "PUBLISHED" ? t("published") : t("archived")}</option>)}
       </select>
-      <button disabled={isPending} type="submit">{isPending ? "Saving…" : "Save"}</button>
+      <button disabled={isPending} type="submit">{isPending ? t("saving") : t("save")}</button>
       {state.message !== null ? <span role={state.kind === "success" ? "status" : "alert"}>{state.message}</span> : null}
     </form>
   );

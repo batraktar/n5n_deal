@@ -14,11 +14,11 @@ export async function createBuyerMessage(assetId: string, content: string): Prom
   });
 
   if (asset === null) {
-    return { kind: "error", message: "This opportunity is no longer available." };
+    return { kind: "error", message: "opportunityUnavailable" };
   }
 
   if (!canBuyerContactSeller(buyer.id, asset.sellerId)) {
-    return { kind: "error", message: "You cannot contact your own listing." };
+    return { kind: "error", message: "ownListing" };
   }
 
   await prisma.message.create({
@@ -30,5 +30,5 @@ export async function createBuyerMessage(assetId: string, content: string): Prom
     },
   });
 
-  return { kind: "success", message: "Message sent to the seller." };
+  return { kind: "success", message: "sentSeller" };
 }

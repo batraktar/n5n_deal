@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { AssetForm } from "@/components/seller/asset-form";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -11,6 +12,7 @@ type EditSellerAssetPageProps = Readonly<{
 }>;
 
 export default async function EditSellerAssetPage({ params }: EditSellerAssetPageProps) {
+  const t = await getTranslations("seller");
   const { assetId } = await params;
   const asset = await getSellerAssetById(assetId);
 
@@ -22,10 +24,10 @@ export default async function EditSellerAssetPage({ params }: EditSellerAssetPag
     <>
       <SiteHeader />
       <main className="seller-editor container">
-        <Link className="back-link" href="/seller/dashboard">← Seller dashboard</Link>
-        <p className="eyebrow">Edit opportunity</p>
+        <Link className="back-link" href="/seller/dashboard">← {t("assetBack")}</Link>
+        <p className="eyebrow">{t("editOpportunity")}</p>
         <h1>{asset.title}</h1>
-        <p className="seller-editor__intro">Update the buyer-facing information or change the publication state of this asset.</p>
+        <p className="seller-editor__intro">{t("editIntro")}</p>
         <AssetForm
           assetId={asset.id}
           initialValues={{

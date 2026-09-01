@@ -4,19 +4,19 @@ export const assetStatusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
 
 const optionalPositiveNumber = z.preprocess(
   (value) => (value === "" || value === undefined ? undefined : value),
-  z.coerce.number().positive("Revenue must be greater than zero.").max(100_000_000_000).optional(),
+  z.coerce.number().positive("revenuePositive").max(100_000_000_000).optional(),
 );
 
 export const assetFormSchema = z.object({
-  title: z.string().trim().min(3, "Use at least 3 characters.").max(140),
-  description: z.string().trim().min(30, "Use at least 30 characters.").max(4_000),
-  industry: z.string().trim().min(2, "Industry is required.").max(80),
-  valuation: z.coerce.number().positive("Valuation must be greater than zero.").max(100_000_000_000),
+  title: z.string().trim().min(3, "assetTitleMin").max(140, "assetTitleMax"),
+  description: z.string().trim().min(30, "descriptionMin").max(4_000, "descriptionMax"),
+  industry: z.string().trim().min(2, "industryRequired").max(80, "industryMax"),
+  valuation: z.coerce.number().positive("valuationPositive").max(100_000_000_000),
   currency: z.preprocess(
     (value) => (typeof value === "string" ? value.trim().toUpperCase() : value),
-    z.string().length(3).regex(/^[A-Z]{3}$/, "Use a three-letter currency code.").default("USD"),
+    z.string().length(3).regex(/^[A-Z]{3}$/, "currencyCode").default("USD"),
   ),
-  location: z.string().trim().min(2, "Location is required.").max(120),
+  location: z.string().trim().min(2, "locationRequired").max(120, "locationMax"),
   revenue: optionalPositiveNumber,
   status: z.enum(assetStatusOptions),
 });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { SellerAssetCard } from "@/components/seller/seller-asset-card";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -9,28 +10,26 @@ type SellerDashboardPageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
 }>;
 
-const notices = {
-  created: "Asset created. You can publish it when the listing is ready.",
-  updated: "Asset changes saved.",
-  "status-updated": "Listing status updated.",
-} as const;
-
-function getNotice(value: string | readonly string[] | undefined): string | null {
+function getNotice(
+  value: string | readonly string[] | undefined,
+  translate: (key: "noticeCreated" | "noticeUpdated" | "noticeStatusUpdated") => string,
+): string | null {
   switch (value) {
     case "created":
-      return notices.created;
+      return translate("noticeCreated");
     case "updated":
-      return notices.updated;
+      return translate("noticeUpdated");
     case "status-updated":
-      return notices["status-updated"];
+      return translate("noticeStatusUpdated");
     default:
       return null;
   }
 }
 
 export default async function SellerDashboardPage({ searchParams }: SellerDashboardPageProps) {
+  const t = await getTranslations("seller");
   const [assets, parameters] = await Promise.all([getSellerAssets(), searchParams]);
-  const notice = getNotice(parameters["notice"]);
+  const notice = getNotice(parameters["notice"], t);
 
   return (
     <>
@@ -38,18 +37,18 @@ export default async function SellerDashboardPage({ searchParams }: SellerDashbo
       <main className="seller-dashboard container">
         <div className="seller-dashboard__heading">
           <div>
-            <p className="eyebrow">Seller workspace</p>
-            <h1>Your opportunities</h1>
-            <p>Prepare, publish, and maintain the opportunities represented by your company.</p>
+            <p className="eyebrow">{t("workspaceEyebrow")}</p>
+            <h1>{t("dashboardTitle")}</h1>
+            <p>{t("dashboardDescription")}</p>
           </div>
-          <Link className="link-button link-button--primary" href="/seller/assets/new">Create asset</Link>
+          <Link className="link-button link-button--primary" href="/seller/assets/new">{t("createAsset")}</Link>
         </div>
         {notice !== null ? <p className="seller-notice" role="status">{notice}</p> : null}
         {assets.length === 0 ? (
           <section className="empty-state">
-            <h2>Create your first opportunity</h2>
-            <p>Start with a clear summary, indicative valuation, and the market context buyers need.</p>
-            <Link href="/seller/assets/new">Create asset</Link>
+            <h2>{t("emptyTitle")}</h2>
+            <p>{t("emptyDescription")}</p>
+            <Link href="/seller/assets/new">{t("createAsset")}</Link>
           </section>
         ) : <div className="seller-asset-list">{assets.map((asset) => <SellerAssetCard asset={asset} key={asset.id} />)}</div>}
       </main>

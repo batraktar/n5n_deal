@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { BuyerProfileForm } from "@/components/buyer/buyer-profile-form";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -14,17 +15,18 @@ function isSavedNotice(value: string | readonly string[] | undefined): boolean {
 }
 
 export default async function BuyerProfilePage({ searchParams }: BuyerProfilePageProps) {
+  const t = await getTranslations("buyer");
   const [profile, parameters] = await Promise.all([getBuyerProfile(), searchParams]);
 
   return (
     <>
       <SiteHeader />
       <main className="seller-editor buyer-profile container">
-        <Link className="back-link" href="/buyer/dashboard">← Buyer dashboard</Link>
-        <p className="eyebrow">Investment profile</p>
-        <h1>What are you looking for?</h1>
-        <p className="seller-editor__intro">Your preferences guide the recommendations shown in your buyer workspace.</p>
-        {isSavedNotice(parameters["notice"]) ? <p className="seller-notice" role="status">Investment preferences saved.</p> : null}
+        <Link className="back-link" href="/buyer/dashboard">← {t("backDashboard")}</Link>
+        <p className="eyebrow">{t("profileEyebrow")}</p>
+        <h1>{t("profileTitle")}</h1>
+        <p className="seller-editor__intro">{t("profileDescription")}</p>
+        {isSavedNotice(parameters["notice"]) ? <p className="seller-notice" role="status">{t("saved")}</p> : null}
         <BuyerProfileForm
           initialValues={{
             budgetMax: profile?.budgetMax === null || profile === null ? undefined : Number(profile.budgetMax),

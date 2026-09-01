@@ -1,43 +1,44 @@
+import { getTranslations } from "next-intl/server";
+
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LinkButton } from "@/components/ui/link-button";
 
 const marketplaceSignals = [
-  ["€1M–€25M", "Typical opportunity value"],
-  ["3 roles", "Buyer, seller, and manager"],
-  ["One place", "For high-intent conversations"],
+  ["€1M–€25M", "value"],
+  ["3 roles", "roles"],
+  ["One place", "conversations"],
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const t = await getTranslations("home");
+
   return (
     <div id="top">
       <SiteHeader />
       <main>
         <section className="hero container" id="opportunities">
           <div className="hero__copy">
-            <p className="eyebrow">Private market, clearly connected</p>
-            <h1>More signal. Better conversations. Stronger deals.</h1>
-            <p className="hero__summary">
-              N5Deal brings focused investors and credible business opportunities into one deliberate
-              marketplace.
-            </p>
+            <p className="eyebrow">{t("eyebrow")}</p>
+            <h1>{t("title")}</h1>
+            <p className="hero__summary">{t("summary")}</p>
             <div className="hero__actions" id="contact">
-              <LinkButton href="#how-it-works">Explore opportunities</LinkButton>
+              <LinkButton href="#how-it-works">{t("explore")}</LinkButton>
               <LinkButton href="#quality" variant="secondary">
-                List a business
+                {t("listBusiness")}
               </LinkButton>
             </div>
           </div>
-          <aside aria-label="Marketplace snapshot" className="signal-card">
+          <aside aria-label={t("snapshotLabel")} className="signal-card">
             <div className="signal-card__heading">
               <span className="status-dot" />
-              Curated marketplace
+              {t("curated")}
             </div>
-            <p className="signal-card__title">A cleaner starting point for every transaction.</p>
+            <p className="signal-card__title">{t("snapshotTitle")}</p>
             <dl className="signal-list">
-              {marketplaceSignals.map(([value, label]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
+              {marketplaceSignals.map(([value, labelKey]) => (
+                <div key={labelKey}>
+                  <dt>{t(`signals.${labelKey}`)}</dt>
                   <dd>{value}</dd>
                 </div>
               ))}
@@ -47,15 +48,12 @@ export default function HomePage() {
 
         <section className="principles" id="how-it-works">
           <div className="container principles__grid">
-            <p className="eyebrow">Built for intent</p>
-            <h2>Private-market discovery without the usual noise.</h2>
+            <p className="eyebrow">{t("principlesEyebrow")}</p>
+            <h2>{t("principlesTitle")}</h2>
             <div className="principles__copy">
-              <p>
-                Sellers present the fundamentals. Buyers articulate what they are looking for. Platform
-                managers keep the marketplace credible.
-              </p>
+              <p>{t("principlesCopy")}</p>
               <a className="text-link" href="#quality">
-                See the marketplace standard
+                {t("standardLink")}
               </a>
             </div>
           </div>
@@ -63,24 +61,24 @@ export default function HomePage() {
 
         <section className="quality container" id="quality">
           <div>
-            <p className="eyebrow">The N5Deal standard</p>
-            <h2>Designed for the decisions behind the headline number.</h2>
+            <p className="eyebrow">{t("standardEyebrow")}</p>
+            <h2>{t("standardTitle")}</h2>
           </div>
           <div className="quality__cards">
             <article>
               <span>01</span>
-              <h3>Structured opportunity data</h3>
-              <p>Clear context makes the first conversation worth having.</p>
+              <h3>{t("cards.dataTitle")}</h3>
+              <p>{t("cards.dataCopy")}</p>
             </article>
             <article>
               <span>02</span>
-              <h3>Relevant counterparties</h3>
-              <p>Profiles make fit visible before time is spent.</p>
+              <h3>{t("cards.counterpartiesTitle")}</h3>
+              <p>{t("cards.counterpartiesCopy")}</p>
             </article>
             <article>
               <span>03</span>
-              <h3>Human marketplace oversight</h3>
-              <p>Quality management keeps the product useful as it grows.</p>
+              <h3>{t("cards.oversightTitle")}</h3>
+              <p>{t("cards.oversightCopy")}</p>
             </article>
           </div>
         </section>

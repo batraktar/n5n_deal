@@ -3,11 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useActionState, startTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { saveSellerAssetAction } from "@/features/seller/actions";
 import { assetFormSchema } from "@/features/seller/asset-validation";
 import { initialSellerAssetFormState } from "@/features/seller/seller-types";
+import { translateValidationMessage } from "@/lib/i18n/validation";
 
 import type { AssetFormInput, AssetFormValues } from "@/features/seller/asset-validation";
 
@@ -46,6 +48,8 @@ function toFormData(values: AssetFormValues, assetId: string | undefined): FormD
 }
 
 export function AssetForm({ assetId, initialValues = defaultValues }: AssetFormProps) {
+  const t = useTranslations("seller");
+  const validationT = useTranslations("validation");
   const [state, submitAction, isPending] = useActionState(saveSellerAssetAction, initialSellerAssetFormState);
   const form = useForm<AssetFormInput, unknown, AssetFormValues>({
     defaultValues: initialValues,
@@ -58,45 +62,45 @@ export function AssetForm({ assetId, initialValues = defaultValues }: AssetFormP
     });
   });
 
-  const titleError = form.formState.errors.title?.message ?? state.fieldErrors.title;
-  const descriptionError = form.formState.errors.description?.message ?? state.fieldErrors.description;
-  const industryError = form.formState.errors.industry?.message ?? state.fieldErrors.industry;
-  const valuationError = form.formState.errors.valuation?.message ?? state.fieldErrors.valuation;
-  const currencyError = form.formState.errors.currency?.message ?? state.fieldErrors.currency;
-  const locationError = form.formState.errors.location?.message ?? state.fieldErrors.location;
-  const revenueError = form.formState.errors.revenue?.message ?? state.fieldErrors.revenue;
+  const titleError = translateValidationMessage(validationT, form.formState.errors.title?.message ?? state.fieldErrors.title);
+  const descriptionError = translateValidationMessage(validationT, form.formState.errors.description?.message ?? state.fieldErrors.description);
+  const industryError = translateValidationMessage(validationT, form.formState.errors.industry?.message ?? state.fieldErrors.industry);
+  const valuationError = translateValidationMessage(validationT, form.formState.errors.valuation?.message ?? state.fieldErrors.valuation);
+  const currencyError = translateValidationMessage(validationT, form.formState.errors.currency?.message ?? state.fieldErrors.currency);
+  const locationError = translateValidationMessage(validationT, form.formState.errors.location?.message ?? state.fieldErrors.location);
+  const revenueError = translateValidationMessage(validationT, form.formState.errors.revenue?.message ?? state.fieldErrors.revenue);
 
   return (
     <form className="seller-form" noValidate onSubmit={submit}>
       {state.message !== null ? <p className="seller-form__message" role="alert">{state.message}</p> : null}
       <div className="seller-form__grid">
         <label className="seller-form__field seller-form__field--wide">
-          <span>Asset title</span>
+          <span>{t("assetTitle")}</span>
           <input aria-invalid={titleError !== undefined} {...form.register("title")} />
           {titleError !== undefined ? <small>{titleError}</small> : null}
         </label>
         <label className="seller-form__field seller-form__field--wide">
-          <span>Overview</span>
+          <span>{t("overview")}</span>
           <textarea aria-invalid={descriptionError !== undefined} rows={6} {...form.register("description")} />
           {descriptionError !== undefined ? <small>{descriptionError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Industry</span>
+          <span>{t("industry")}</span>
           <input aria-invalid={industryError !== undefined} {...form.register("industry")} />
           {industryError !== undefined ? <small>{industryError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Location</span>
+          <span>{t("location")}</span>
           <input aria-invalid={locationError !== undefined} {...form.register("location")} />
           {locationError !== undefined ? <small>{locationError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Indicative valuation</span>
+          <span>{t("valuation")}</span>
           <input aria-invalid={valuationError !== undefined} inputMode="decimal" type="number" {...form.register("valuation", { valueAsNumber: true })} />
           {valuationError !== undefined ? <small>{valuationError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Currency</span>
+          <span>{t("currency")}</span>
           <select aria-invalid={currencyError !== undefined} {...form.register("currency")}>
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
@@ -105,24 +109,24 @@ export function AssetForm({ assetId, initialValues = defaultValues }: AssetFormP
           {currencyError !== undefined ? <small>{currencyError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Annual revenue (optional)</span>
+          <span>{t("revenue")}</span>
           <input aria-invalid={revenueError !== undefined} inputMode="decimal" type="number" {...form.register("revenue", { setValueAs: (value: string) => value === "" ? undefined : Number(value) })} />
           {revenueError !== undefined ? <small>{revenueError}</small> : null}
         </label>
         <label className="seller-form__field">
-          <span>Listing status</span>
+          <span>{t("listingStatus")}</span>
           <select {...form.register("status")}>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ARCHIVED">Archived</option>
+            <option value="DRAFT">{t("draft")}</option>
+            <option value="PUBLISHED">{t("published")}</option>
+            <option value="ARCHIVED">{t("archived")}</option>
           </select>
         </label>
       </div>
       <div className="seller-form__actions">
         <button className="seller-button" disabled={isPending} type="submit">
-          {isPending ? "Saving…" : assetId === undefined ? "Create asset" : "Save changes"}
+          {isPending ? t("saving") : assetId === undefined ? t("createAsset") : t("saveChanges")}
         </button>
-        <Link className="text-link" href="/seller/dashboard">Cancel</Link>
+        <Link className="text-link" href="/seller/dashboard">{t("cancel")}</Link>
       </div>
     </form>
   );

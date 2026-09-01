@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import type { AssetPreview } from "@/features/assets/asset-types";
 
@@ -6,15 +7,18 @@ type AssetCardProps = Readonly<{
   asset: AssetPreview;
 }>;
 
-function formatCurrency(value: string, currency: string): string {
-  return new Intl.NumberFormat("en-US", {
+function formatCurrency(value: string, currency: string, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     currency,
     maximumFractionDigits: 0,
     style: "currency",
   }).format(Number(value));
 }
 
-export function AssetCard({ asset }: AssetCardProps) {
+export async function AssetCard({ asset }: AssetCardProps) {
+  const t = await getTranslations("asset");
+  const locale = await getLocale();
+
   return (
     <article className="asset-card">
       <div className="asset-card__meta">
@@ -25,16 +29,16 @@ export function AssetCard({ asset }: AssetCardProps) {
       <p>{asset.description}</p>
       <dl className="asset-card__facts">
         <div>
-          <dt>Asking valuation</dt>
-          <dd>{formatCurrency(asset.valuation, asset.currency)}</dd>
+          <dt>{t("askingValuation")}</dt>
+          <dd>{formatCurrency(asset.valuation, asset.currency, locale)}</dd>
         </div>
         <div>
-          <dt>Seller</dt>
+          <dt>{t("seller")}</dt>
           <dd>{asset.sellerName}</dd>
         </div>
       </dl>
       <Link className="asset-card__link" href={`/assets/${asset.id}`}>
-        View opportunity
+        {t("viewOpportunity")}
       </Link>
     </article>
   );

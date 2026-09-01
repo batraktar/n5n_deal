@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { AdminUserStatusForm } from "@/components/admin/admin-user-status-form";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -13,6 +14,9 @@ type AdminUsersPageProps = Readonly<{
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
+  const t = await getTranslations("admin");
+  const filterT = await getTranslations("filters");
+  const locale = await getLocale();
   const parameters = await searchParams;
   const search = parseAdminUserSearch(parameters);
   const users = await getAdminUsers(search);
@@ -21,25 +25,25 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
     <>
       <SiteHeader />
       <main className="admin-management container">
-        <Link className="back-link" href="/admin">← Platform manager</Link>
-        <p className="eyebrow">Participants</p>
-        <h1>Manage users</h1>
+        <Link className="back-link" href="/admin">← {t("back")}</Link>
+        <p className="eyebrow">{t("participants")}</p>
+        <h1>{t("usersTitle")}</h1>
         <form className="admin-filter-form" method="get">
-          <label><span>Search</span><input defaultValue={search.query} name="query" placeholder="Name or email" /></label>
-          <label><span>Role</span><select defaultValue={search.role} name="role">{adminRoleFilterOptions.map((role) => <option key={role} value={role}>{role === "ALL" ? "All roles" : role}</option>)}</select></label>
-          <label><span>Status</span><select defaultValue={search.status} name="status"><option value="ALL">All statuses</option>{adminUserStatusOptions.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
-          <button type="submit">Apply</button>
+          <label><span>{filterT("search")}</span><input defaultValue={search.query} name="query" placeholder={filterT("nameEmailPlaceholder")} /></label>
+          <label><span>{filterT("role")}</span><select defaultValue={search.role} name="role"><option value="ALL">{filterT("allRoles")}</option>{adminRoleFilterOptions.filter((role) => role !== "ALL").map((role) => <option key={role} value={role}>{role === "BUYER" ? t("buyerRole") : role === "SELLER" ? t("sellerRole") : t("adminRole")}</option>)}</select></label>
+          <label><span>{filterT("status")}</span><select defaultValue={search.status} name="status"><option value="ALL">{filterT("allStatuses")}</option>{adminUserStatusOptions.map((status) => <option key={status} value={status}>{status === "ACTIVE" ? t("active") : t("suspended")}</option>)}</select></label>
+          <button type="submit">{filterT("applyShort")}</button>
         </form>
-        {users.length === 0 ? <section className="empty-state"><h2>No users found</h2><p>Change the search or filter values to review a wider set of participants.</p></section> : (
+        {users.length === 0 ? <section className="empty-state"><h2>{t("noUsers")}</h2><p>{t("noUsersDescription")}</p></section> : (
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Action</th></tr></thead>
+              <thead><tr><th>{t("user")}</th><th>{t("role")}</th><th>{t("status")}</th><th>{t("joined")}</th><th>{t("action")}</th></tr></thead>
               <tbody>{users.map((user) => (
                 <tr key={user.id}>
                   <td><strong>{user.name}</strong><span>{user.email}</span></td>
-                  <td>{user.role}</td>
-                  <td><span className={`admin-status admin-status--${user.status.toLowerCase()}`}>{user.status}</span></td>
-                  <td>{user.createdAt.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" })}</td>
+                  <td>{user.role === "BUYER" ? t("buyerRole") : user.role === "SELLER" ? t("sellerRole") : t("adminRole")}</td>
+                  <td><span className={`admin-status admin-status--${user.status.toLowerCase()}`}>{user.status === "ACTIVE" ? t("active") : t("suspended")}</span></td>
+                  <td>{user.createdAt.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })}</td>
                   <td><AdminUserStatusForm status={user.status} userId={user.id} /></td>
                 </tr>
               ))}</tbody>

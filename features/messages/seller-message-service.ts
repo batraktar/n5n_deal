@@ -21,7 +21,7 @@ export async function createSellerMessage(
   });
 
   if (buyer === null) {
-    return { kind: "error", message: "This buyer is no longer available." };
+    return { kind: "error", message: "buyerUnavailable" };
   }
 
   await prisma.message.create({
@@ -32,5 +32,5 @@ export async function createSellerMessage(
     },
   });
 
-  return { kind: "success", message: "Message sent to the buyer." };
+  return { kind: "success", message: "sentBuyer" };
 }

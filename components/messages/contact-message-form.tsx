@@ -2,9 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { buyerMessageFormSchema, initialBuyerMessageActionState } from "@/features/messages/message-validation";
+import { translateValidationMessage } from "@/lib/i18n/validation";
 
 import type { BuyerMessageActionState, BuyerMessageFormValues } from "@/features/messages/message-validation";
 
@@ -28,9 +30,11 @@ export function ContactMessageForm({
   recipientId,
   submitLabel,
 }: ContactMessageFormProps) {
+  const t = useTranslations("messages");
+  const validationT = useTranslations("validation");
   const [state, submitAction, isPending] = useActionState(action, initialBuyerMessageActionState);
   const form = useForm<BuyerMessageFormValues>({ resolver: zodResolver(buyerMessageFormSchema) });
-  const contentError = form.formState.errors.content?.message;
+  const contentError = translateValidationMessage(validationT, form.formState.errors.content?.message);
   const messageId = `message-${fieldName}-${recipientId}`;
   const errorId = `${messageId}-error`;
 
@@ -51,7 +55,7 @@ export function ContactMessageForm({
           aria-invalid={contentError !== undefined}
           aria-describedby={contentError === undefined ? undefined : errorId}
           id={messageId}
-          placeholder="Introduce your interest and the next step."
+          placeholder={t("placeholder")}
           rows={4}
           {...form.register("content")}
         />
@@ -59,7 +63,7 @@ export function ContactMessageForm({
       {contentError !== undefined ? <small id={errorId} role="alert">{contentError}</small> : null}
       {state.message !== null ? <p role={state.kind === "success" ? "status" : "alert"}>{state.message}</p> : null}
       <button className="link-button link-button--primary" disabled={isPending} type="submit">
-        {isPending ? "Sending…" : submitLabel}
+        {isPending ? t("sending") : submitLabel}
       </button>
     </form>
   );

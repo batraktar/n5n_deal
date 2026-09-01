@@ -6,17 +6,19 @@ type AssetFilterFormProps = Readonly<{
   search: AssetSearch;
 }>;
 
-export function AssetFilterForm({ filters, search }: AssetFilterFormProps) {
+export async function AssetFilterForm({ filters, search }: AssetFilterFormProps) {
+  const t = await getTranslations("filters");
+
   return (
     <form action="/marketplace" className="asset-filters">
       <label>
-        <span>Search</span>
-        <input defaultValue={search.query} name="query" placeholder="Company, industry, or keyword" type="search" />
+        <span>{t("search")}</span>
+        <input defaultValue={search.query} name="query" placeholder={t("companyPlaceholder")} type="search" />
       </label>
       <label>
-        <span>Industry</span>
+        <span>{t("industry")}</span>
         <select defaultValue={search.industry} name="industry">
-          <option value="">All industries</option>
+          <option value="">{t("allIndustries")}</option>
           {filters.industries.map((industry) => (
             <option key={industry} value={industry}>
               {industry}
@@ -25,9 +27,9 @@ export function AssetFilterForm({ filters, search }: AssetFilterFormProps) {
         </select>
       </label>
       <label>
-        <span>Location</span>
+        <span>{t("location")}</span>
         <select defaultValue={search.location} name="location">
-          <option value="">All locations</option>
+          <option value="">{t("allLocations")}</option>
           {filters.locations.map((location) => (
             <option key={location} value={location}>
               {location}
@@ -35,7 +37,8 @@ export function AssetFilterForm({ filters, search }: AssetFilterFormProps) {
           ))}
         </select>
       </label>
-      <button type="submit">Apply filters</button>
+      <button type="submit">{t("apply")}</button>
     </form>
   );
 }
+import { getTranslations } from "next-intl/server";
