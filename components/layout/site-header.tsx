@@ -7,6 +7,7 @@ const navigationItems = [
   { href: "/admin", label: "Platform manager" },
   { href: "/buyer/dashboard", label: "Buyer workspace" },
   { href: "/seller/dashboard", label: "Seller workspace" },
+  { href: "/seller/buyers", label: "Find buyers" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#quality", label: "Our standard" },
 ] as const;

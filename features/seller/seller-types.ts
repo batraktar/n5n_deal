@@ -19,6 +19,25 @@ export type SellerAssetFormState = Readonly<{
   fieldErrors: Readonly<Partial<Record<keyof import("./asset-validation").AssetFormValues, string | undefined>>>;
 }>;
 
+export type SellerBuyer = Readonly<{
+  budgetMax: string | null;
+  budgetMin: string | null;
+  companyName: string | null;
+  currency: string;
+  id: string;
+  industries: readonly string[];
+  interests: string;
+  matchReasons: readonly string[];
+  matchScore: number | null;
+  name: string;
+  preferredLocations: readonly string[];
+}>;
+
+export type SellerBuyerFilterOptions = Readonly<{
+  industries: readonly string[];
+  locations: readonly string[];
+}>;
+
 export const initialSellerAssetFormState: SellerAssetFormState = {
   fieldErrors: {},
   kind: "idle",
