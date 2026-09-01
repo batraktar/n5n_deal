@@ -41,6 +41,7 @@ N5Deal helps investors discover quality business opportunities and gives sellers
 - `SiteFooter`: concise product and status context.
 - `LinkButton`: primary and secondary link presentation.
 - `N5DealMark`: project-specific SVG wordmark mark.
+- `ContactMessageForm`: shared validated outreach composer with pending, success, and error states.
 
 ## 6. States and motion
 
@@ -50,5 +51,5 @@ N5Deal helps investors discover quality business opportunities and gives sellers
 
 ## 7. Accepted debt
 
-- Full authentication, buyer/seller discovery beyond the current contact flow, richer messaging, and data visualizations remain future product phases.
+- Full authentication, richer messaging, and data visualizations remain future product phases.
 - The foundation does not load remote fonts or imagery; this keeps the first render fast and avoids an external asset dependency.

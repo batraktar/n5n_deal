@@ -13,7 +13,10 @@ The seeded seller can:
 - view their own listings at `/seller/dashboard`;
 - create an asset at `/seller/assets/new`;
 - edit an owned asset at `/seller/assets/[assetId]/edit`;
-- set a listing to `DRAFT`, `PUBLISHED`, or `ARCHIVED`.
+- set a listing to `DRAFT`, `PUBLISHED`, or `ARCHIVED`;
+- browse, search, and filter active buyer profiles at `/seller/buyers`;
+- view buyer interests, budget compatibility, and match reasons;
+- send an internal message to a buyer.
 
 The server derives the demo seller from the database and includes `sellerId` in every read and write query. A seller cannot edit or change the status of another seller's asset.
 
@@ -173,6 +176,7 @@ Useful routes:
 
 - `/marketplace` — public asset discovery;
 - `/seller/dashboard` — seller asset management;
+- `/seller/buyers` — buyer directory and seller outreach;
 - `/buyer/dashboard` — buyer recommendations;
 - `/buyer/profile` — buyer preferences;
 - `/admin` — platform manager overview;
