@@ -10,18 +10,20 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
-    "predev": "prisma generate",
-    "prebuild": "prisma generate",
-    "prestart": "prisma generate",
+    "postinstall": "prisma generate --config ./prisma.config.ts",
+    "predev": "prisma generate --config ./prisma.config.ts",
+    "prebuild": "prisma generate --config ./prisma.config.ts",
+    "prestart": "prisma generate --config ./prisma.config.ts",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:generate": "prisma generate",
-    "db:validate": "prisma validate",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:generate": "prisma generate --config ./prisma.config.ts",
+    "db:validate": "prisma validate --config ./prisma.config.ts",
+    "db:migrate": "prisma migrate dev --config ./prisma.config.ts",
+    "db:deploy": "prisma migrate deploy --config ./prisma.config.ts",
+    "db:seed": "prisma db seed --config ./prisma.config.ts",
+    "db:studio": "prisma studio --config ./prisma.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

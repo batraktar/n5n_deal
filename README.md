@@ -189,9 +189,10 @@ Useful routes:
 
 | Variable | Purpose | Example format |
 | --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string used by Prisma, application queries, migrations, and the seed script. | `postgresql://user:password@localhost:5432/database?schema=public` |
+| `DATABASE_URL` | Required PostgreSQL connection string used by application queries and as the Prisma CLI fallback. Configure it as a Vercel secret in every deployed environment. | `postgresql://user:password@localhost:5432/database?schema=public` |
+| `DIRECT_URL` | Optional direct PostgreSQL connection string for Prisma migration commands. When omitted, Prisma falls back to `DATABASE_URL`. | `postgresql://user:password@host:5432/database?schema=public` |
 
-The committed `.env.example` uses the local Compose credentials. Production credentials must be supplied through the hosting provider's secret environment configuration.
+The committed `.env.example` uses the local Compose credentials. Production credentials must be supplied through the hosting provider's secret environment configuration and must never use a `NEXT_PUBLIC_` prefix.
 
 ## Database
 
@@ -236,9 +237,11 @@ The seller and admin persistence flows have also been exercised locally against 
 
 No public deployment is included in this submission.
 
-The intended MVP deployment is a Next.js host such as Vercel connected to a managed PostgreSQL provider. Configure `DATABASE_URL` as a production secret, run the committed Prisma migration before serving traffic, and use the existing `pnpm build` / `pnpm start` commands for the application process.
+The intended MVP deployment is Vercel connected to a managed PostgreSQL provider. Vercel runs `pnpm install`, whose `postinstall` script generates the Prisma Client from the checked-in `prisma.config.ts`, then runs `pnpm build`. Client generation does not require a live database connection; application requests do.
 
-For a production pipeline, the migration step should use Prisma's non-interactive deploy command (`prisma migrate deploy`) rather than the local development migration workflow currently exposed by `pnpm db:migrate`. Authentication, database backups, monitoring, and a managed secret store are also required before real users or transactions are supported.
+Set `DATABASE_URL` in Vercel for Production, Preview, and Development as appropriate. Add `DIRECT_URL` only when the provider exposes a separate direct connection for schema commands. Apply committed migrations before serving traffic with `pnpm db:deploy`; do not run development migrations or seed data during the Vercel build.
+
+Authentication, database backups, monitoring, and a managed secret store are also required before real users or transactions are supported.
 
 ## Technical decisions
 
