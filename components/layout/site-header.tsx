@@ -4,6 +4,7 @@ import { N5DealMark } from "@/components/ui/n5deal-mark";
 
 const navigationItems = [
   { href: "/marketplace", label: "Opportunities" },
+  { href: "/buyer/dashboard", label: "Buyer workspace" },
   { href: "/seller/dashboard", label: "Seller workspace" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#quality", label: "Our standard" },
