@@ -10,6 +10,9 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "predev": "prisma generate",
+    "prebuild": "prisma generate",
+    "prestart": "prisma generate",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
